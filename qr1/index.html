@@ -33,6 +33,10 @@ const s2=document.getElementById('s2');
 const s3=document.getElementById('s3');
 const s4=document.getElementById('s4');
 const v1=document.getElementById('v1');
+const a1=document.getElementById('a1');
+const a2=document.getElementById('a2');
+const a3=document.getElementById('a3');
+const a4=document.getElementById('a4');
 const startBtn=document.getElementById('startBtn');
 
 startBtn.onclick=()=>{
@@ -63,4 +67,22 @@ function step2(){
   s2.classList.remove('active');
   s3.classList.add('active');
   a3.play();
-  a3
+  a3.onended=()=>{
+    let b=document.createElement('button');
+    b.textContent='Voir la vidéo';
+    b.onclick=()=>{b.remove();step3()};
+    s3.appendChild(b);
+  }
+}
+
+function step3(){
+  s3.classList.remove('active');
+  s4.classList.add('active');
+  a4.play();
+  a4.onended=()=>{
+    v1.play();
+  }
+}
+</script>
+</body>
+</html>
