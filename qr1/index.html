@@ -87,6 +87,11 @@ function step3(){
     v1.play().catch(e=>console.log('Video trounoir error:',e));
   }
 }
-</script>
-</body>
-</html>
+
+v1.onended=()=>{
+  let b=document.createElement('button');
+  b.textContent='Recommencer';
+  b.style.position='fixed';
+  b.style.bottom='40px';
+  b.style.left='50%';
+  b.style.transform='translate
