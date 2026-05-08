@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR5 - Chapitre 3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);cursor:pointer;display:none;z-index:10}
+#photo{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
+  opacity:0;
+  transition:opacity 1.5s ease;
+}
+#texte{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:20px;
+  line-height:1.6;
+  background:rgba(0,0,0,0.85);
+  padding:35px 25px;
+  border-radius:12px;
+  text-align:center;
+  display:none;
+  z-index:5;
+  max-width:85vw;
+  opacity:0;
+  transition:opacity 1.5s ease;
+}
+#texte p{margin:12px 0}
+#texte .dialogue{font-style:italic;color:#ddd}
+#texte .citation{font-weight:bold;font-size:24px;margin:20px 0;color:#fff}
+</style>
+</head>
+<body>
+<button id="btn">Touchez pour commencer</button>
+<button id="restart">Recommencer</button>
+<img id="photo" src="./course.jpg" alt="Noé et Sam courent">
 
+<div id="texte">
+  <p class="dialogue">— T'as eu un trou noir cette semaine ?</p>
+  <p class="dialogue">— Mercredi soir. Deux heures.</p>
+  <p class="dialogue">— Ça te fait peur ?</p>
+  <p class="dialogue">— Ce qui me fait peur, c'est si un jour j'en reviens plus vraiment.</p>
+  <p>Noé hoche la tête. Il ne dit pas c'est pas grave.</p>
+  <p class="citation">Il dit juste : "Je serais là."</p>
+  <p>Ce n'est pas grand-chose. C'est tout.</p>
+</div>
+
+<audio id="bruit" src="./course_bruit.mp3" preload="auto"></audio>
+<audio id="voix" src="./noe_je_serais_la.mp3" preload="auto"></audio>
+
+<script>
+const btn=document.getElementById('btn');
+const restart=document.getElementById('restart');
+const photo=document.getElementById('photo');
+const texte=document.getElementById('texte');
+const bruit=document.getElementById('bruit');
+const voix=document.getElementById('voix');
+
+btn.onclick=()=>{
+  btn.style.display='none';
+  bruit.play().catch(e=>alert('Activez le son'));
+}
+
+bruit.onended=()=>{
+  photo.style.display='block';
+  setTimeout(()=>{
+    photo.style.opacity='1';
+    voix.play();
+  },100);
+}
+
+voix.onended=()=>{
+  texte.style.display='block';
+  setTimeout(()=>{
+    texte.style.opacity='1';
+    restart.style.display='block';
+  },500);
+}
+
+restart.onclick=()=>location.reload();
+</script>
+</body>
+</html>
