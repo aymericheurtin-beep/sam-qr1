@@ -45,7 +45,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <body>
 <button id="btn">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
-<img id="photo" src="./course.jpg" alt="Noé et Sam courent">
+<img id="photo" src="./course.png" alt="Noé et Sam courent">
 
 <div id="texte">
   <p class="dialogue">— T'as eu un trou noir cette semaine ?</p>
@@ -77,7 +77,10 @@ bruit.onended=()=>{
   photo.style.display='block';
   setTimeout(()=>{
     photo.style.opacity='1';
-    voix.play();
+    // Attend 4 secondes avant de lancer la voix
+    setTimeout(()=>{
+      voix.play();
+    },4000);
   },100);
 }
 
