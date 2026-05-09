@@ -135,15 +135,17 @@ async function runSequence() {
   await playSafe(gifle);
   await sleep(50);
   document.body.classList.remove('flash');
-  await sleep(800);
   
-  // 6. 10s de respiration + texte final qui apparaît pendant
+  // 6. SILENCE 2s après la gifle
+  await sleep(2000);
+  
+  // 7. 10s de respiration + texte final qui apparaît pendant
   playSafe(respi);
   await sleep(1500); // Laisse 1.5s de respi seule
-  await showTextStay("C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé n'est pas surpris.", 2000);
+  await showTextStay("C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé ne soit pas surpris.", 2000);
   await sleep(8500); // Le reste des 10s
   
-  // 7. Bouton recommencer
+  // 8. Bouton recommencer
   restartBtn.style.display = 'block';
   setTimeout(() => restartBtn.style.opacity = '1', 50);
 }
