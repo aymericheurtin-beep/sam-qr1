@@ -46,7 +46,6 @@
     opacity: 0; 
     transition: opacity 0.3s;
     display: none;
-    border: 2px solid red; /* DEBUG: cadre rouge pour voir si elle existe */
   }
   
   .corner {
@@ -83,7 +82,7 @@
 <div id="stage">
   <button id="startBtn" class="btn">Touchez pour commencer</button>
   
-  <img id="oeil" src="imageoeil.jpg" alt="oeil" onerror="alert('Erreur: imageoeil.jpg introuvable')">
+  <img id="oeil" src="oeil.jpg" alt="oeil" onerror="this.src='imageoeil.jpeg'; this.onerror=null;">
   <div id="irisGlow"></div>
   
   <div class="corner tl"></div>
