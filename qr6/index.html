@@ -104,7 +104,6 @@
 <audio id="voix" src="audio_vidal.mp3" preload="auto"></audio>
 
 <script>
-const stage = document.getElementById('stage');
 const startBtn = document.getElementById('startBtn');
 const oeil = document.getElementById('oeil');
 const texte = document.getElementById('texte');
@@ -127,26 +126,33 @@ startBtn.addEventListener('click', () => {
   runSequence();
 });
 
+async function playSafe(audio) {
+  try { await audio.play(); } 
+  catch(e) { console.log('Audio error:', audio.src, e); }
+}
+
 async function runSequence() {
-  await tictac.play();
+  // 1. Tic-tac 2s
+  await playSafe(tictac);
   await sleep(2000);
   
+  // 2. Flash + scan
   document.body.classList.add('flash');
   await sleep(120);
   document.body.classList.remove('flash');
-  await scan.play();
+  await playSafe(scan);
   await sleep(880);
   
+  // 3. Œil + coins
   oeil.style.opacity = '1';
   corners.forEach(c => c.style.opacity = '1');
   await sleep(500);
   
-  voix.play();
+  // 4. Voix + pulse
+  await playSafe(voix);
+  setTimeout(() => irisGlow.classList.add('pulse'), 4500);
   
-  setTimeout(() => {
-    irisGlow.classList.add('pulse');
-  }, 4500);
-  
+  // 5. Fin
   voix.onended = async () => {
     corners.forEach(c => c.style.opacity = '0');
     await sleep(300);
