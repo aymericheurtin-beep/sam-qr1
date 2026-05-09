@@ -40,7 +40,6 @@
     display: none;
   }
   
-  /* Coins scanner */
   .corner {
     position: absolute; width: 8vmin; height: 8vmin;
     border: 2px solid #00E5FF; opacity: 0;
@@ -63,7 +62,6 @@
     display: none;
   }
   
-  /* Iris bleu pulsant */
   #irisGlow {
     position: absolute;
     width: 14vmin; height: 14vmin;
@@ -102,7 +100,7 @@
 </div>
 
 <audio id="tictac" src="tictac.mp3" preload="auto"></audio>
-<audio id="scan" src="scan.mp3" preload="auto"></audio>
+<audio id="scan" src="scanner.mp3" preload="auto"></audio>
 <audio id="voix" src="audio_vidal.mp3" preload="auto"></audio>
 
 <script>
@@ -130,30 +128,25 @@ startBtn.addEventListener('click', () => {
 });
 
 async function runSequence() {
-  // 1. Tic-tac 2s
   await tictac.play();
   await sleep(2000);
   
-  // 2. Flash blanc + son scan 1s
   document.body.classList.add('flash');
   await sleep(120);
   document.body.classList.remove('flash');
   await scan.play();
   await sleep(880);
   
-  // 3. Apparition œil + coins scanner
   oeil.style.opacity = '1';
   corners.forEach(c => c.style.opacity = '1');
   await sleep(500);
   
-  // 4. Voix Vidal + pulse bleu sur "retomber"
   voix.play();
   
   setTimeout(() => {
     irisGlow.classList.add('pulse');
   }, 4500);
   
-  // 5. Fin voix → texte final
   voix.onended = async () => {
     corners.forEach(c => c.style.opacity = '0');
     await sleep(300);
