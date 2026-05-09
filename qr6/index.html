@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -38,13 +39,15 @@
   }
   
   #oeil {
-    width: 70vmin; 
-    max-width: 90vw; 
-    max-height: 60vh;
+    position: absolute;
+    width: 100vmin; height: 100vmin;
+    max-width: 100vw; max-height: 100vh;
     object-fit: contain;
-    opacity: 0; 
-    transition: opacity 0.3s;
+    opacity: 0; transition: opacity 0.3s;
     display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .corner {
@@ -52,25 +55,27 @@
     border: 2px solid #00E5FF; opacity: 0;
     transition: opacity 0.2s; display: none;
   }
-  .tl { top: 15vmin; left: 10vmin; border-right:0; border-bottom:0; }
-  .tr { top: 15vmin; right: 10vmin; border-left:0; border-bottom:0; }
-  .bl { bottom: 15vmin; left: 10vmin; border-right:0; border-top:0; }
-  .br { bottom: 15vmin; right: 10vmin; border-left:0; border-top:0; }
+  .tl { top: 10vmin; left: 10vmin; border-right:0; border-bottom:0; }
+  .tr { top: 10vmin; right: 10vmin; border-left:0; border-bottom:0; }
+  .bl { bottom: 10vmin; left: 10vmin; border-right:0; border-top:0; }
+  .br { bottom: 10vmin; right: 10vmin; border-left:0; border-top:0; }
   
   #irisGlow {
     position: absolute;
-    width: 12vmin; height: 12vmin;
+    width: 14vmin; height: 14vmin;
     border-radius: 50%;
     background: radial-gradient(circle, #00E5FF 0%, #00B8D4 40%, transparent 70%);
     opacity: 0; pointer-events: none;
     mix-blend-mode: screen;
+    left: 50%; top: 45%;
+    transform: translate(-50%, -50%);
     display: none;
   }
   .pulse { animation: irisPulse 1.8s ease-out; }
   @keyframes irisPulse { 
-    0%{opacity:0; transform: scale(0.3)} 
-    40%{opacity:0.9; transform: scale(1.1)} 
-    100%{opacity:0; transform: scale(1.6)} 
+    0%{opacity:0; transform:translate(-50%, -50%) scale(0.3)} 
+    40%{opacity:0.9; transform:translate(-50%, -50%) scale(1.1)} 
+    100%{opacity:0; transform:translate(-50%, -50%) scale(1.6)} 
   }
   
   .flash { animation: flashWhite 0.12s; }
@@ -81,7 +86,7 @@
 <div id="stage">
   <button id="startBtn" class="btn">Touchez pour commencer</button>
   
-  <img id="oeil" src="oeil.jpg" alt="oeil">
+  <img id="oeil" src="imageoeil.jpg" alt="oeil">
   <div id="irisGlow"></div>
   
   <div class="corner tl"></div>
