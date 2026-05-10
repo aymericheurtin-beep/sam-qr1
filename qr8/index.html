@@ -74,7 +74,6 @@
     <button id="restart" class="btn">Recommencer</button>
 
     <audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
-    <audio id="brouhaha" src="brouhaha2.mp3" preload="auto"></audio>
 
     <script>
         const start = document.getElementById('start');
@@ -82,7 +81,6 @@
         const image = document.getElementById('image');
         const restart = document.getElementById('restart');
         const annonce = document.getElementById('annonce');
-        const brouhaha = document.getElementById('brouhaha');
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -108,38 +106,34 @@
             text.classList.remove('visible');
             await sleep(800);
             
-            // 4. Brouhaha
-            brouhaha.play().catch(e => console.log('Erreur brouhaha:', e));
-            await sleep(2000);
-            
-            // 5. Nouveau texte
+            // 4. Nouveau texte direct sans brouhaha
             text.textContent = '8h30. Bureau de Mme Arnaud.';
             text.classList.add('visible');
             await sleep(2000);
             text.classList.remove('visible');
             await sleep(500);
             
-            // 6. CAMERA 6s - 1 SEULE FOIS
+            // 5. CAMERA 6s - caméra.png
             image.style.transition = 'opacity 1s';
-            image.src = 'caméra.jpeg';
+            image.src = 'caméra.png';
             image.classList.add('visible');
-            await sleep(6000); // 6 secondes
+            await sleep(6000);
             
-            // 7. FONDU VERS FUMEE 4s - 1 SEULE FOIS
+            // 6. FONDU VERS FUMEE 4s
             image.classList.remove('visible');
-            await sleep(1000); // temps du fade out
+            await sleep(1000);
             image.src = 'fumee.png';
             image.classList.add('visible');
-            await sleep(4000); // 4 secondes
+            await sleep(4000);
             
-            // 8. FONDU VERS CARNET
+            // 7. FONDU VERS CARNET
             image.classList.remove('visible');
             await sleep(1000);
             image.src = 'carnet.png';
             image.classList.add('visible');
             await sleep(4000);
             
-            // 9. Bouton recommencer
+            // 8. Bouton recommencer
             restart.classList.add('visible');
         }
 
