@@ -29,7 +29,6 @@
             cursor: pointer;
             position: relative;
             z-index: 9999;
-            pointer-events: auto;
         }
         #start {
             animation: blink 1.5s infinite;
@@ -56,7 +55,6 @@
             height: 100vmin;
             object-fit: contain;
             opacity: 0;
-            transition: opacity 1s;
             z-index: 9997;
         }
         #restart {
@@ -79,8 +77,6 @@
     <audio id="brouhaha" src="brouhaha2.mp3" preload="auto"></audio>
 
     <script>
-        console.log('Script démarré');
-        
         const start = document.getElementById('start');
         const text = document.getElementById('text');
         const image = document.getElementById('image');
@@ -88,23 +84,23 @@
         const annonce = document.getElementById('annonce');
         const brouhaha = document.getElementById('brouhaha');
 
-        console.log('Bouton start trouvé:', start);
-
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
         async function sequence() {
-            console.log('SEQUENCE LANCEE');
             start.classList.add('hidden');
             
+            // 1. Texte intro
             text.textContent = 'vendredi 8h27\ncollège les Peupliers Blancs';
             text.classList.add('visible');
             await sleep(2500);
             
+            // 2. Audio annonce Mme Arnaud
             text.classList.remove('visible');
             await sleep(500);
             annonce.play().catch(e => console.log('Erreur annonce:', e));
             await sleep(4200);
             
+            // 3. SILENCE LONG
             await sleep(1500);
             text.textContent = 'Silence.';
             text.classList.add('visible');
@@ -112,43 +108,43 @@
             text.classList.remove('visible');
             await sleep(800);
             
+            // 4. Brouhaha
             brouhaha.play().catch(e => console.log('Erreur brouhaha:', e));
             await sleep(2000);
             
+            // 5. Nouveau texte
             text.textContent = '8h30. Bureau de Mme Arnaud.';
             text.classList.add('visible');
             await sleep(2000);
             text.classList.remove('visible');
             await sleep(500);
             
+            // 6. CAMERA 6s - 1 SEULE FOIS
+            image.style.transition = 'opacity 1s';
             image.src = 'caméra.jpeg';
             image.classList.add('visible');
-            await sleep(5000);
+            await sleep(6000); // 6 secondes
             
-            image.style.transition = 'opacity 1.5s';
+            // 7. FONDU VERS FUMEE 4s - 1 SEULE FOIS
             image.classList.remove('visible');
-            await sleep(1500);
+            await sleep(1000); // temps du fade out
             image.src = 'fumee.png';
             image.classList.add('visible');
-            await sleep(3000);
+            await sleep(4000); // 4 secondes
             
+            // 8. FONDU VERS CARNET
             image.classList.remove('visible');
-            await sleep(1500);
+            await sleep(1000);
             image.src = 'carnet.png';
             image.classList.add('visible');
             await sleep(4000);
             
+            // 9. Bouton recommencer
             restart.classList.add('visible');
         }
 
-        start.onclick = function() {
-            console.log('CLIC BOUTON');
-            sequence();
-        };
-        
+        start.onclick = () => sequence();
         restart.onclick = () => location.reload();
-        
-        console.log('Event listeners OK');
     </script>
 </body>
 </html>
