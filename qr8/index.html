@@ -110,8 +110,8 @@
             annonce.play().catch(e => console.log('Erreur audio:', e));
             await sleep(4200);
             
-            // Plus de "Silence" - on passe direct
-            await sleep(1500);
+            // Pause silencieuse sans texte
+            await sleep(3000);
             
             text.textContent = '8h30. Bureau de Mme Arnaud.';
             text.classList.add('visible');
@@ -119,13 +119,8 @@
             text.classList.remove('visible');
             await sleep(500);
             
-            // CAM 6s - 1 SEULE FOIS
             await showImage('cam.png', 6000);
-            
-            // FUMEE 4s - 1 SEULE FOIS
             await showImage('fumee.png', 4000);
-            
-            // CARNET 4s
             await showImage('carnet.png', 4000);
             
             restart.classList.add('visible');
