@@ -69,8 +69,8 @@
     <img id="image" src="">
     <button id="restart" class="btn">Recommencer</button>
 
-    <audio id="annonce" src="message_arnaud.mp3"></audio>
-    <audio id="brouhaha" src="brouhaha2.mp3"></audio>
+    <audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
+    <audio id="brouhaha" src="brouhaha2.mp3" preload="auto"></audio>
 
     <script>
         const start = document.getElementById('start');
@@ -79,6 +79,9 @@
         const restart = document.getElementById('restart');
         const annonce = document.getElementById('annonce');
         const brouhaha = document.getElementById('brouhaha');
+
+        annonce.load();
+        brouhaha.load();
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -93,7 +96,7 @@
             // 2. Audio annonce Mme Arnaud
             text.classList.remove('visible');
             await sleep(500);
-            annonce.play();
+            annonce.play().catch(e => console.log('Erreur audio:', e));
             await sleep(4200);
             
             // 3. SILENCE LONG
@@ -105,7 +108,7 @@
             await sleep(800);
             
             // 4. Brouhaha
-            brouhaha.play();
+            brouhaha.play().catch(e => console.log('Erreur audio:', e));
             await sleep(2000);
             
             // 5. Nouveau texte
@@ -140,10 +143,7 @@
         }
 
         start.addEventListener('click', sequence);
-
-        restart.addEventListener('click', () => {
-            location.reload();
-        });
+        restart.addEventListener('click', () => location.reload());
     </script>
 </body>
 </html>
