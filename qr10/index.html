@@ -9,7 +9,7 @@
         body {
             background: #000;
             color: #fff;
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
@@ -37,14 +37,14 @@
         }
         #text {
             position: absolute;
-            font-size: 4.5vmin;
+            font-size: 4vmin;
             text-align: center;
             padding: 5vmin;
-            line-height: 1.5;
+            line-height: 1.6;
             opacity: 0;
             transition: opacity 1s;
             white-space: pre-line;
-            font-family: 'Courier New', monospace;
+            max-width: 90vw;
             z-index: 9998;
         }
         #image {
@@ -65,7 +65,6 @@
         .visible { opacity: 1 !important; }
         .hidden { display: none !important; }
         
-        /* Effet vibreur sur l'image du téléphone */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-3px); }
@@ -94,34 +93,50 @@
         const audio3 = document.getElementById('audio3');
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
+        
+        // Attend que l'audio soit fini pour passer à la suite
+        const playAndWait = (audio) => {
+            return new Promise(resolve => {
+                audio.onended = resolve;
+                audio.play().catch(e => {
+                    console.log('Erreur audio:', e);
+                    resolve(); // Continue même si erreur
+                });
+            });
+        };
+
+        // Reset complet entre chaque scène
+        const clearScene = async () => {
+            text.classList.remove('visible');
+            image.classList.remove('visible', 'vibrating');
+            await sleep(1000); // Attend la fin du fondu
+            image.src = '';
+            text.textContent = '';
+        };
 
         async function sequence() {
             start.classList.add('hidden');
             
             // 1. Écran noir + couloir + chuchotement Inès
-            audio1.play().catch(e => console.log('Erreur audio1:', e));
-            await sleep(4000);
+            await playAndWait(audio1); // Attend la VRAIE fin de l'audio
+            await sleep(500);
             
             // 2. Image : Porte chambre 214 + main Inès + Rémy dans le lit
             image.src = 'portechambre.png';
             image.classList.add('visible');
-            await sleep(3500);
-            image.classList.remove('visible');
-            await sleep(800);
+            await sleep(4000); // Temps de lecture visuelle
+            await clearScene();
             
             // 3. Audio : Rémy râpe "...Je l'ai trouvé... jeudi..."
-            audio2.play().catch(e => console.log('Erreur audio2:', e));
-            await sleep(5000);
+            await playAndWait(audio2);
+            await sleep(500);
             
             // 4. Image : Téléphone + vibreur Winamax intégré
-            image.src = 'téléphone.png';
+            image.src = 'winamax.png'; // Tu viens d'ajouter winamax.png, je l'utilise
             image.classList.add('visible');
-            image.classList.add('vibrating'); // Effet tremblement
-            audio3.play().catch(e => console.log('Erreur audio3:', e));
-            await sleep(3000);
-            image.classList.remove('vibrating');
-            image.classList.remove('visible');
-            await sleep(800);
+            image.classList.add('vibrating');
+            await playAndWait(audio3);
+            await clearScene();
             
             // 5. Fondu texte révélation Inès
             text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :\n\nITT accident travail — montant indemnisation — délai versement.';
