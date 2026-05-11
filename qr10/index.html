@@ -90,7 +90,7 @@
     <button id="start" class="btn">Touchez pour entrer</button>
     <div id="text"></div>
     <img id="media" src="" style="display:none;">
-    <video id="video" playsinline webkit-playsinline style="display:none;" preload="auto"></video>
+    <video id="video" playsinline webkit-playsinline muted style="display:none;" preload="auto"></video>
     <button id="restart" class="btn">Recommencer</button>
 
     <audio id="audio1" src="couloirhopital2.mp3" preload="auto" playsinline webkit-playsinline></audio>
@@ -183,9 +183,9 @@
                 await playAndWait(audio2);
                 await sleep(500);
                 
-                // 4. VIDÉO CASIO - Le vol
+                // 4. VIDÉO CASIO - Le vol, c'est le climax
                 await showVideo('montre_poche.mp4');
-                await sleep(500);
+                await sleep(1500); // Laisse 1.5s de noir après la vidéo pour digérer
                 await clearScene();
                 
                 // 5. Winamax + vibreur
@@ -203,18 +203,12 @@
                 text.classList.remove('visible');
                 await sleep(1000);
                 
-                // 7. ITT
+                // 7. ITT - FIN
                 await showImage('ittversement.png');
                 await sleep(5000);
                 await clearScene();
                 
-                // 8. Texte final Casio
-                text.textContent = 'Puis elle se penche vers le sac plastique de Rémy.\nDedans : une Casio noire. Bracelet usé. Écran fissuré. Arrêtée à 19 h 42.\n\nInès se fige. Une demi-seconde. Comme un bug.\n\nElle jette un coup d\'œil à Rémy — il dort. À Sam — il regarde le plafond,\nvérifiant peut-être la présence des alarmes incendie.\n\nEt puis, sans un mot, geste propre, geste rapide,\nelle glisse la montre dans sa poche.\n\nSam n\'a rien vu.';
-                text.classList.add('visible');
-                await sleep(12000);
-                await clearScene();
-                
-                // 9. Bouton recommencer
+                // 8. Bouton recommencer direct, pas de texte
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
