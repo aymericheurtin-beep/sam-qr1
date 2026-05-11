@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -75,6 +74,7 @@
 
     <audio id="audio1" src="audio_vidal.mp3" preload="auto"></audio>
     <audio id="audio2" src="cadenas_troisfois.mp3" preload="auto"></audio>
+    <audio id="audio3" src="audio_inesnoe.mp3" preload="auto"></audio>
 
     <script>
         const start = document.getElementById('start');
@@ -83,6 +83,7 @@
         const restart = document.getElementById('restart');
         const audio1 = document.getElementById('audio1');
         const audio2 = document.getElementById('audio2');
+        const audio3 = document.getElementById('audio3');
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -117,10 +118,9 @@
             image.classList.remove('visible');
             await sleep(1500);
             
-            // Fin : Texte papier Noé
-            text.textContent = 'Noé rentre dans le vestiaire et fait tomber un morceau de papier, sans s\'en apercevoir.\nInès le ramasse discrètement.';
-            text.classList.add('visible');
-            await sleep(4000);
+            // Fin : Audio Inès/Noé au lieu du texte
+            audio3.play().catch(e => console.log('Erreur audio3:', e));
+            await sleep(5000); // Mets ici la durée exacte de audio_inesnoe.mp3
             
             restart.classList.add('visible');
         }
