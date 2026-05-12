@@ -128,21 +128,24 @@
                 await sleep(4000);
                 await hideImage();
                 
-                // 2. Vidal jeune - 2s seule
+                // 2. Vidal jeune - 5s SEULE pour lire l'article + photo
                 await showImage('vidal_jeune.png');
-                await sleep(2000);
+                await sleep(5000); // <-- Temps de lecture augmenté
                 
-                // 3. Bruit clés démarre
+                // 3. Bruit clés démarre MAIS on reste sur vidal_jeune
                 audioKey.play();
                 
-                // 4. Après 1s SEULEMENT : on switch sur phot_carnet + bruit photo
-                // Résultat : les 2 sons jouent ensemble presque tout le temps
-                await sleep(1000);
+                // 4. On attend 1.5s : le spectateur entend "cling cling" sur l'image vidal_jeune
+                // Ça crée le lien mental : les pas arrivent vers LUI
+                await sleep(1500);
+                
+                // 5. MAINTENANT on switch : phot_carnet + bruit photo
+                // Overlap : bruitkey continue + bruit_pagephoto démarre
                 await hideImage();
                 await showImage('phot_carnet.png');
                 audioPage.play();
                 
-                // 5. On attend que le plus long des 2 sons finisse
+                // 6. On attend que les 2 sons finissent
                 await Promise.all([
                     new Promise(r => audioKey.onended = r),
                     new Promise(r => audioPage.onended = r)
@@ -150,12 +153,12 @@
                 
                 await hideImage();
                 
-                // 6. Sous le bureau - FIN
+                // 7. Sous le bureau - FIN
                 await showImage('souslatable.png');
                 await sleep(4000);
                 await hideImage();
                 
-                // 7. Bouton recommencer
+                // 8. Bouton recommencer
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
