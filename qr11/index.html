@@ -98,16 +98,6 @@
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         
-        const playAudio = (audio) => {
-            return new Promise(resolve => {
-                audio.onended = resolve;
-                audio.play().catch(e => {
-                    console.log('Erreur audio:', e);
-                    resolve();
-                });
-            });
-        };
-
         const showImage = (src) => {
             return new Promise((resolve) => {
                 media.onload = () => {
@@ -138,34 +128,34 @@
                 await sleep(4000);
                 await hideImage();
                 
-                // 2. Vidal jeune - 3s seule
+                // 2. Vidal jeune - 2s seule
                 await showImage('vidal_jeune.png');
-                await sleep(3000);
+                await sleep(2000);
                 
-                // 3. Bruit clés : on lance et on calcule quand changer d'image
+                // 3. Bruit clés démarre
                 audioKey.play();
                 
-                // Attend que le son ait joué jusqu'à 2s de la fin
-                const keyDuration = audioKey.duration * 1000; // en ms
-                const waitBeforeSwitch = keyDuration - 2000; // on garde 2s
-                await sleep(waitBeforeSwitch > 0 ? waitBeforeSwitch : 0);
-                
-                // 4. À 2s de la fin de bruitkey.mp3 : on passe à phot_carnet + on lance bruit_pagephoto.mp3
-                // Les 2 sons se chevauchent pendant 2s
+                // 4. Après 1s SEULEMENT : on switch sur phot_carnet + bruit photo
+                // Résultat : les 2 sons jouent ensemble presque tout le temps
+                await sleep(1000);
                 await hideImage();
                 await showImage('phot_carnet.png');
                 audioPage.play();
                 
-                // On attend que bruit_pagephoto.mp3 finisse
-                await playAudio(audioPage);
+                // 5. On attend que le plus long des 2 sons finisse
+                await Promise.all([
+                    new Promise(r => audioKey.onended = r),
+                    new Promise(r => audioPage.onended = r)
+                ]);
+                
                 await hideImage();
                 
-                // 5. Sous le bureau - FIN
+                // 6. Sous le bureau - FIN
                 await showImage('souslatable.png');
                 await sleep(4000);
                 await hideImage();
                 
-                // 6. Bouton recommencer
+                // 7. Bouton recommencer
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
