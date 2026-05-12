@@ -1,1 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>QR12</title>
+    <style>
+        html, body, div, span, img, video, button { 
+            all: unset; 
+            display: revert; 
+            box-sizing: border-box;
+        }
+        body > div:not(#text):not(#start):not(#restart) { display: none !important; }
+        
+        html, body {
+            background: #000 !important;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+        .btn {
+            font-size: 4vmin;
+            padding: 3vmin 6vmin;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            position: relative;
+            z-index: 9999;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #start { animation: blink 1.5s infinite; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        #text {
+            position: fixed;
+            font-size: 3.8vmin;
+            text-align: center;
+            padding: 5vmin;
+            line-height: 1.7;
+            opacity: 0;
+            transition: opacity 1s;
+            white-space: pre-line;
+            max-width: 90vw;
+            z-index: 9998;
+        }
+        #media {
+            position: fixed;
+            width: 100vmin;
+            height: 100vmin;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1.2s;
+            z-index: 9997;
+            background: #000;
+        }
+        #restart {
+            position: fixed;
+            bottom: 10vmin;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .visible { opacity: 1 !important; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <button id="start" class="btn">Touchez pour entrer</button>
+    <div id="text"></div>
+    <img id="media" src="" style="display:none;">
+    <button id="restart" class="btn">Recommencer</button>
 
+    <audio id="audioNarrateur" src="audio_narrateur.mp3" preload="auto" playsinline webkit-playsinline></audio>
+
+    <script>
+        const start = document.getElementById('start');
+        const text = document.getElementById('text');
+        const media = document.getElementById('media');
+        const restart = document.getElementById('restart');
+        const audioNarrateur = document.getElementById('audioNarrateur');
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        
+        const showImage = (src) => {
+            return new Promise((resolve) => {
+                media.onload = () => {
+                    media.style.display = 'block';
+                    media.classList.add('visible');
+                    resolve();
+                };
+                media.onerror = () => {
+                    console.error('Image introuvable:', src);
+                    resolve();
+                };
+                media.src = src;
+            });
+        };
+
+        const hideImage = async () => {
+            media.classList.remove('visible');
+            await sleep(1200);
+            media.src = '';
+        };
+
+        const showText = async (content, duration) => {
+            text.textContent = content;
+            text.classList.add('visible');
+            await sleep(duration);
+            text.classList.remove('visible');
+            await sleep(1000);
+        };
+
+        async function sequence() {
+            start.classList.add('hidden');
+            
+            try {
+                await showText("Un coup de pouce ? Optionnel.", 3000);
+                await showText("8h31. Bureau de Mme Arnaud.\n7 personnes dans une pièce pour 3.", 4000);
+                await showImage('touslessuspects.png');
+                audioNarrateur.play();
+                await new Promise(r => audioNarrateur.onended = r);
+                await hideImage();
+                await showText("Maintenant, ferme.\nPendant qu’Inès parle, c’est à toi :\nimagine ce qu’ils cachent.", 5000);
+                await showText("À la fin du chapitre,\ndemande-toi : tu l’imaginais comme ça ?", 5000);
+                restart.classList.add('visible');
+            } catch(e) {
+                console.error('Erreur:', e);
+                text.textContent = 'Erreur. Rechargez la page.';
+                text.classList.add('visible');
+                restart.classList.add('visible');
+            }
+        }
+
+        start.onclick = () => sequence();
+        restart.onclick = () => location.reload();
+    </script>
+</body>
+</html>
