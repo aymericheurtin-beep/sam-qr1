@@ -7,12 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 0.8s ease}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 1s ease}
 .screen.active{display:flex}
 .screen.fadeout{opacity:0}
 img,video{max-width:90%;max-height:70vh;object-fit:contain}
 #startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
-#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10}
+#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;transition:opacity 1s ease;opacity:0}
+#restartBtn.show{opacity:1}
 </style>
 </head>
 <body>
@@ -20,30 +21,25 @@ img,video{max-width:90%;max-height:70vh;object-fit:contain}
 <button id="restartBtn">Recommencer</button>
 
 <div id="s2" class="screen">
-  <video id="v2" src="../courir.mp4" muted playsinline></video>
+  <img src="main.png" alt="">
 </div>
-<div id="s3" class="screen"><img src="main.png" alt=""></div>
-<div id="s4" class="screen">
-  <video id="v1" src="../trounoir.webm" playsinline></video>
+<div id="s3" class="screen">
+  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline></video>
 </div>
 
 <audio id="a2" src="audio/p2-sam.mp3"></audio>
 <audio id="a3" src="audio/p3-toc.mp3"></audio>
-<audio id="a4" src="audio/p4-absence.mp3"></audio>
 
 <script>
 const s2=document.getElementById('s2');
 const s3=document.getElementById('s3');
-const s4=document.getElementById('s4');
 const v1=document.getElementById('v1');
-const v2=document.getElementById('v2');
 const a2=document.getElementById('a2');
 const a3=document.getElementById('a3');
-const a4=document.getElementById('a4');
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 
-const PAUSE = 1200; // 1.2s de noir entre les séquences
+const PAUSE = 1200;
 
 startBtn.onclick=()=>{
   startBtn.remove();
@@ -52,44 +48,34 @@ startBtn.onclick=()=>{
 
 function step1(){
   s2.classList.add('active');
-  v2.play().catch(e=>console.log('Video courir error:',e));
   a2.play().catch(e=>console.log('Audio2 error:',e));
-  
-  // Coupe la vidéo après 5s mais laisse l'audio tourner
-  setTimeout(()=>{
-    v2.pause();
-    s2.classList.add('fadeout');
-  },5000);
-  
   a2.onended=()=>{
-    s2.classList.remove('active','fadeout');
-    setTimeout(step2, PAUSE); // pause avant suite
+    s2.classList.add('fadeout');
+    setTimeout(()=>{
+      s2.classList.remove('active','fadeout');
+      step2();
+    }, 1000);
   }
 }
 
 function step2(){
-  s3.classList.add('active');
-  a3.play().catch(e=>console.log('Audio3 error:',e));
-  a3.onended=()=>{
-    s3.classList.remove('active');
-    setTimeout(step3, PAUSE); // pause avant suite
-  }
-}
-
-function step3(){
-  s4.classList.add('active');
-  a4.play().catch(e=>console.log('Audio4 error:',e));
-  a4.onended=()=>{
-    setTimeout(()=>{
-      v1.play().catch(e=>console.log('Video trounoir error:',e));
-    }, 800); // petite pause avant la vidéo finale
-  }
+  setTimeout(()=>{
+    s3.classList.add('active');
+    a3.play().catch(e=>console.log('Audio3 error:',e));
+    a3.onended=()=>{
+      setTimeout(()=>{
+        v1.play().catch(e=>console.log('Video trounoir error:',e));
+      }, 800);
+    }
+  }, PAUSE);
 }
 
 v1.onended=()=>{
+  s3.classList.add('fadeout');
   setTimeout(()=>{
     restartBtn.style.display='block';
-  }, 1000); // pause avant bouton recommencer
+    setTimeout(()=>restartBtn.classList.add('show'), 50);
+  }, 1000);
 }
 
 restartBtn.onclick=()=>{location.reload()};
