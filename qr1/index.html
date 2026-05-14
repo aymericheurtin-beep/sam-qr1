@@ -7,80 +7,74 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 0.8s ease}
 .screen.active{display:flex}
+.screen.fadeout{opacity:0}
 img,video{max-width:90%;max-height:70vh;object-fit:contain}
-button{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:20px;z-index:10}
-#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100}
+#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
+#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10}
 </style>
 </head>
 <body>
 <button id="startBtn">Touchez pour commencer</button>
-<div id="s1" class="screen"></div>
+<button id="restartBtn">Recommencer</button>
+
 <div id="s2" class="screen">
-  <video id="v2" src="../courir.mp4" muted loop playsinline></video>
+  <video id="v2" src="../courir.mp4" muted playsinline></video>
 </div>
 <div id="s3" class="screen"><img src="main.png" alt=""></div>
 <div id="s4" class="screen">
   <video id="v1" src="../trounoir.webm" playsinline></video>
 </div>
-<audio id="a1" src="audio/p1-intro.mp3"></audio>
+
 <audio id="a2" src="audio/p2-sam.mp3"></audio>
 <audio id="a3" src="audio/p3-toc.mp3"></audio>
 <audio id="a4" src="audio/p4-absence.mp3"></audio>
+
 <script>
-const s1=document.getElementById('s1');
 const s2=document.getElementById('s2');
 const s3=document.getElementById('s3');
 const s4=document.getElementById('s4');
 const v1=document.getElementById('v1');
 const v2=document.getElementById('v2');
-const a1=document.getElementById('a1');
 const a2=document.getElementById('a2');
 const a3=document.getElementById('a3');
 const a4=document.getElementById('a4');
 const startBtn=document.getElementById('startBtn');
+const restartBtn=document.getElementById('restartBtn');
 
 startBtn.onclick=()=>{
   startBtn.remove();
-  s1.classList.add('active');
-  a1.play().catch(e=>console.log('Audio1 error:',e));
-  a1.onended=()=>{
-    let b=document.createElement('button');
-    b.textContent='Voir la suite';
-    b.onclick=()=>{b.remove();step1()};
-    s1.appendChild(b);
-  }
+  step1();
 }
 
 function step1(){
-  s1.classList.remove('active');
   s2.classList.add('active');
   v2.play().catch(e=>console.log('Video courir error:',e));
   a2.play().catch(e=>console.log('Audio2 error:',e));
+  
+  // Coupe la vidéo après 5s mais laisse l'audio tourner
+  setTimeout(()=>{
+    v2.pause();
+    s2.classList.add('fadeout');
+  },5000);
+  
   a2.onended=()=>{
-    let b=document.createElement('button');
-    b.textContent='Continuer';
-    b.onclick=()=>{b.remove();step2()};
-    s2.appendChild(b);
+    s2.classList.remove('active','fadeout');
+    step2();
   }
 }
 
 function step2(){
-  v2.pause();
-  s2.classList.remove('active');
   s3.classList.add('active');
   a3.play().catch(e=>console.log('Audio3 error:',e));
   a3.onended=()=>{
-    let b=document.createElement('button');
-    b.textContent='Continuer';
-    b.onclick=()=>{b.remove();step3()};
-    s3.appendChild(b);
+    s3.classList.remove('active');
+    step3();
   }
 }
 
 function step3(){
-  s3.classList.remove('active');
   s4.classList.add('active');
   a4.play().catch(e=>console.log('Audio4 error:',e));
   a4.onended=()=>{
@@ -89,15 +83,10 @@ function step3(){
 }
 
 v1.onended=()=>{
-  let b=document.createElement('button');
-  b.textContent='Recommencer';
-  b.style.position='fixed';
-  b.style.bottom='40px';
-  b.style.left='50%';
-  b.style.transform='translateX(-50%)';
-  b.onclick=()=>{location.reload()};
-  s4.appendChild(b);
+  restartBtn.style.display='block';
 }
+
+restartBtn.onclick=()=>{location.reload()};
 </script>
 </body>
 </html>
