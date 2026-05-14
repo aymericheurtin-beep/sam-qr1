@@ -20,6 +20,9 @@ img,video{max-width:90%;max-height:70vh;object-fit:contain}
 <button id="startBtn">Touchez pour commencer</button>
 <button id="restartBtn">Recommencer</button>
 
+<div id="s0" class="screen">
+  <video id="v0" src="audio/courir.mp4" playsinline muted></video>
+</div>
 <div id="s1" class="screen">
   <img src="main.png" alt="">
 </div>
@@ -32,8 +35,10 @@ img,video{max-width:90%;max-height:70vh;object-fit:contain}
 <audio id="a4" src="audio/p4-absence.mp3"></audio>
 
 <script>
+const s0=document.getElementById('s0');
 const s1=document.getElementById('s1');
 const s2=document.getElementById('s2');
+const v0=document.getElementById('v0');
 const v1=document.getElementById('v1');
 const a2=document.getElementById('a2');
 const a3=document.getElementById('a3');
@@ -45,14 +50,33 @@ const PAUSE = 1200;
 
 startBtn.onclick=()=>{
   startBtn.remove();
-  step1();
+  step0();
 }
 
-// Étape 1 : p2-sam.mp3 + main.png
+// 0. courir.mp4 5s + p2-sam.mp3
+function step0(){
+  s0.classList.add('active');
+  v0.play().catch(e=>console.log('Video courir error:',e));
+  a2.play().catch(e=>console.log('Audio2 error:',e));
+  
+  setTimeout(()=>{
+    v0.pause();
+    s0.classList.add('fadeout');
+  },5000);
+  
+  a2.onended=()=>{
+    setTimeout(()=>{
+      s0.classList.remove('active','fadeout');
+      step1();
+    }, 500);
+  }
+}
+
+// 1. main.png + p3-toc.mp3
 function step1(){
   s1.classList.add('active');
-  a2.play().catch(e=>console.log('Audio2 error:',e));
-  a2.onended=()=>{
+  a3.play().catch(e=>console.log('Audio3 error:',e));
+  a3.onended=()=>{
     s1.classList.add('fadeout');
     setTimeout(()=>{
       s1.classList.remove('active','fadeout');
@@ -61,25 +85,17 @@ function step1(){
   }
 }
 
-// Étape 2 : p3-toc.mp3 sur fond noir
+// 2. p4-absence.mp3 puis trou_noir_clean.mp4
 function step2(){
   setTimeout(()=>{
-    a3.play().catch(e=>console.log('Audio3 error:',e));
-    a3.onended=()=>{
-      setTimeout(step3, PAUSE);
+    s2.classList.add('active');
+    a4.play().catch(e=>console.log('Audio4 error:',e));
+    a4.onended=()=>{
+      setTimeout(()=>{
+        v1.play().catch(e=>console.log('Video trounoir error:',e));
+      }, 800);
     }
   }, PAUSE);
-}
-
-// Étape 3 : p4-absence.mp3 puis vidéo trou noir
-function step3(){
-  s2.classList.add('active');
-  a4.play().catch(e=>console.log('Audio4 error:',e));
-  a4.onended=()=>{
-    setTimeout(()=>{
-      v1.play().catch(e=>console.log('Video trounoir error:',e));
-    }, 800);
-  }
 }
 
 v1.onended=()=>{
