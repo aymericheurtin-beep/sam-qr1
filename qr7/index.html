@@ -12,7 +12,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
 #startBtn{position:absolute}
 #restartBtn{position:absolute;bottom:8vmin;display:none;opacity:0;transition:opacity 1.5s}
 #texte{position:absolute;text-align:center;font-size:4.5vmin;line-height:1.8;max-width:85vw;opacity:0;transition:opacity 1.2s}
-.flash{animation:flashWhite .05s}
+.flash{animation:flashWhite.05s}
 @keyframes flashWhite{0%,100%{background:#000}50%{background:#fff}}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;background:#000;z-index:30}
 .screen.active{display:flex}
@@ -29,10 +29,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
 </div>
 
 <div id="pre" class="screen">
-  <p>La gifle, tu l’imagines comment ?</p>
+  <p>La gifle, vous l’imaginez comment?</p>
   <div class="choice">
     <button class="btn choiceBtn" data-val="violente">Violente</button>
     <button class="btn choiceBtn" data-val="contrôlée">Contrôlée</button>
+    <button class="btn choiceBtn" data-val="autre">Autre</button>
   </div>
 </div>
 
@@ -55,6 +56,7 @@ const respi=document.getElementById('respi');
 
 let started=false;
 let choix='';
+
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
 
@@ -108,7 +110,7 @@ async function runSequence(){
   document.body.classList.remove('flash');
   await sleep(2000);
   playSafe(respi);await sleep(1500);
-  await showTextStay(`C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé ne soit pas surpris.<br><span id="recall">T'avais dit ${choix}. Et maintenant ?</span>`,2000);
+  await showTextStay(`C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé ne soit pas surpris.<br><span id="recall">Vous aviez dit ${choix}. Et maintenant?</span>`,2000);
   await sleep(8500);
   restartBtn.style.display='block';
   setTimeout(()=>restartBtn.style.opacity='1',50);
