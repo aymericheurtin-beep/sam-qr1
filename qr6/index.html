@@ -8,66 +8,45 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:Arial,sans-serif;color:#fff}
 #stage{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:#000}
-.btn{background:#fff;color:#000;border:none;padding:12px 24px;font-size:16px;border-radius:8px;cursor:pointer;z-index:10}
+.btn{background:#fff;color:#000;border:none;padding:14px 28px;font-size:18px;border-radius:8px;cursor:pointer;z-index:10}
 #startBtn{position:absolute}
-#restartBtn{position:absolute;bottom:8vmin;display:none;opacity:0;transition:opacity .5s}
-#oeil{position:absolute;width:100vmin;height:100vmin;max-width:100vw;max-height:100vh;object-fit:contain;opacity:0;transition:opacity .3s;display:none;top:50%;left:50%;transform:translate(-50%,-50%)}
-.corner{position:absolute;width:8vmin;height:8vmin;border:2px solid #00E5FF;opacity:0;transition:opacity .2s;display:none}
-.tl{top:10vmin;left:10vmin;border-right:0;border-bottom:0}
-.tr{top:10vmin;right:10vmin;border-left:0;border-bottom:0}
-.bl{bottom:10vmin;left:10vmin;border-right:0;border-top:0}
-.br{bottom:10vmin;right:10vmin;border-left:0;border-top:0}
-#irisGlow{position:absolute;width:14vmin;height:14vmin;border-radius:50%;background:radial-gradient(circle,#00E5FF 0%,#00B8D4 40%,transparent 70%);opacity:0;pointer-events:none;mix-blend-mode:screen;left:50%;top:45%;transform:translate(-50%,-50%);display:none}
-.pulse{animation:irisPulse 1.8s ease-out}
-@keyframes irisPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}40%{opacity:.9;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
-.flash{animation:flashWhite .12s}
-@keyframes flashWhite{0%,100%{background:#000}50%{background:#fff}}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:30;background:#000}
+#restartBtn{position:absolute;bottom:8vmin;display:none;opacity:0;transition:opacity 1.5s}
+#texte{position:absolute;text-align:center;font-size:5vmin;line-height:1.6;max-width:85vw;opacity:0;transition:opacity 1s;font-family:'Courier New',monospace}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;background:#000;z-index:30}
 .screen.active{display:flex}
-.screen p{font-size:22px;line-height:1.4;max-width:650px;margin-bottom:20px}
-.choice{display:flex;gap:20px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.screen p{font-size:22px;margin-bottom:20px}
+.choice{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+#recall{font-size:18px;color:#aaa;margin-top:20px}
 </style>
 </head>
 <body>
 <div id="stage">
   <button id="startBtn" class="btn">Touchez pour commencer</button>
-  <img id="oeil" src="imageoeil.jpg" alt="oeil">
-  <div id="irisGlow"></div>
-  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-</div>
-
-<div id="pre" class="screen">
-  <p>Vidal, tu l'avais imaginé comment ?</p>
-  <div class="choice">
-    <button class="btn choiceBtn" data-val="dur">Quelqu'un de dur</button>
-    <button class="btn choiceBtn" data-val="blessé">Quelqu'un de blessé</button>
-  </div>
-</div>
-
-<div id="post" class="screen">
-  <p id="recall"></p>
+  <div id="texte"></div>
   <button id="restartBtn" class="btn">Recommencer</button>
 </div>
 
-<audio id="tictac" src="tictac.mp3" preload="auto"></audio>
-<audio id="scan" src="scanner.mp3" preload="auto"></audio>
-<audio id="voix" src="audio_vidal.mp3" preload="auto"></audio>
+<div id="pre" class="screen">
+  <p>Vidal, vous l’aviez imaginé comment?</p>
+  <div class="choice">
+    <button class="btn choiceBtn" data-val="dur">Quelqu’un de dur</button>
+    <button class="btn choiceBtn" data-val="blessé">Quelqu’un de blessé</button>
+    <button class="btn choiceBtn" data-val="autre">Autre</button>
+  </div>
+</div>
+
+<audio id="voir" src="voir_drole.mp3" preload="auto"></audio>
 
 <script>
 const startBtn=document.getElementById('startBtn');
-const pre=document.getElementById('pre');
-const post=document.getElementById('post');
-const recall=document.getElementById('recall');
 const restartBtn=document.getElementById('restartBtn');
-const oeil=document.getElementById('oeil');
-const corners=document.querySelectorAll('.corner');
-const irisGlow=document.getElementById('irisGlow');
-const tictac=document.getElementById('tictac');
-const scan=document.getElementById('scan');
-const voix=document.getElementById('voix');
+const texte=document.getElementById('texte');
+const pre=document.getElementById('pre');
+const voir=document.getElementById('voir');
 
 let started=false;
 let choix='';
+
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
 
@@ -83,37 +62,39 @@ document.querySelectorAll('.choiceBtn').forEach(b=>{
     choix=b.dataset.val;
     pre.classList.remove('active');
     startExperience();
-  }
+  };
 });
 
 restartBtn.onclick=()=>location.reload();
 
-function startExperience(){
+async function startExperience(){
   if(started) return;
   started=true;
-  oeil.style.display='block';
-  irisGlow.style.display='block';
-  corners.forEach(c=>c.style.display='block');
   runSequence();
 }
 
-async function playSafe(a){try{await a.play()}catch(e){}}
+async function playSafe(a){try{a.currentTime=0;await a.play()}catch(e){}}
+async function fadeText(txt,hold=2000){
+  texte.innerHTML=txt;
+  texte.style.opacity='1';
+  await sleep(hold);
+  texte.style.opacity='0';
+  await sleep(1000);
+}
+
 async function runSequence(){
-  await playSafe(tictac);await sleep(2000);
-  document.body.classList.add('flash');await sleep(120);document.body.classList.remove('flash');
-  await playSafe(scan);await sleep(880);
-  oeil.style.opacity='1';corners.forEach(c=>c.style.opacity='1');await sleep(500);
-  await playSafe(voix);setTimeout(()=>irisGlow.classList.add('pulse'),4500);
-  voix.onended=()=>{
-    corners.forEach(c=>c.style.opacity='0');
-    setTimeout(()=>{
-      document.getElementById('stage').style.display='none';
-      recall.textContent=`T'avais dit "${choix}". Et maintenant ?`;
-      post.classList.add('active');
-      restartBtn.style.display='block';
-      restartBtn.style.opacity='1';
-    },800);
-  };
+  await fadeText('Il entre.',1500);
+  await fadeText('Pas de cris.',1500);
+  await fadeText('Juste un regard.',1500);
+  await playSafe(voir);
+  await sleep(2500);
+  await fadeText('Vidal ne sourit pas.',2000);
+  await fadeText('Il écoute.',2000);
+  texte.innerHTML=`Vous aviez dit "${choix}".<br>Et maintenant?<br><span id="recall"></span>`;
+  texte.style.opacity='1';
+  await sleep(3000);
+  restartBtn.style.display='block';
+  setTimeout(()=>restartBtn.style.opacity='1',50);
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 </script>
