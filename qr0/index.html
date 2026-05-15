@@ -24,6 +24,10 @@ const msg=document.getElementById('msg');
 const intro=document.getElementById('intro');
 const restart=document.getElementById('restart');
 
+// Initialisation autonomisation
+localStorage.setItem('scans_total',0);
+localStorage.setItem('scans_used',0);
+
 btn.onclick=()=>{
   btn.style.display='none';
   intro.play().catch(()=>alert('Activez le son'));
