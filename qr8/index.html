@@ -11,6 +11,7 @@ body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;wid
 #start{animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 #text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#text small{display:block;font-size:3.2vmin;color:#aaa;margin-top:2vmin;line-height:1.3}
 #image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
 #restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
 .visible{opacity:1!important}
@@ -34,8 +35,8 @@ body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;wid
 <div id="overlay"></div>
 
 <div id="thumbs">
-  <div class="thumb" data-id="cam">Cam</div>
-  <div class="thumb" data-id="fumee">Fumée</div>
+  <div class="thumb" data-id="caméra">Caméra</div>
+  <div class="thumb" data-id="fumée">Fumée</div>
   <div class="thumb" data-id="carnet">Carnet</div>
 </div>
 
@@ -64,7 +65,7 @@ const overlay=document.getElementById('overlay');
 
 let choix='';
 let order=[];
-let opened={cam:false,fumee:false,carnet:false};
+let opened={caméra:false,fumée:false,carnet:false};
 
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
@@ -89,7 +90,7 @@ document.querySelectorAll('.choiceBtn').forEach(b=>{
 restart.onclick=()=>location.reload();
 
 async function showText(txt,hold=2000){
-  text.textContent=txt;
+  text.innerHTML=txt;
   text.classList.add('visible');
   await sleep(hold);
   text.classList.remove('visible');
@@ -97,14 +98,12 @@ async function showText(txt,hold=2000){
 }
 
 async function sequence(){
-  await showText('vendredi 8h27\ncollège les Peupliers Blancs',2500);
+  await showText('vendredi 8h27<br>collège les Peupliers Blancs',2500);
   annonce.play().catch(()=>{});
   await sleep(4200);
   await sleep(3000);
   await showText('8h30. Bureau de Mme Arnaud.',2000);
-
   thumbs.style.display='flex';
-  thumbs.classList.add('visible');
 }
 
 thumbs.addEventListener('click',async e=>{
@@ -113,18 +112,11 @@ thumbs.addEventListener('click',async e=>{
   const id=thumb.dataset.id;
   if(!order.includes(id)) order.push(id);
   thumbs.style.display='none';
-
-  if(id==='cam'){
-    await openCam();
-  }else if(id==='fumee'){
-    await openFumee();
-  }else if(id==='carnet'){
-    await openCarnet();
-  }
-
+  if(id==='caméra') await openCam();
+  else if(id==='fumée') await openFumee();
+  else if(id==='carnet') await openCarnet();
   opened[id]=true;
-
-  if(opened.cam && opened.fumee && opened.carnet){
+  if(opened.caméra && opened.fumée && opened.carnet){
     await final();
   }else{
     thumbs.style.display='flex';
@@ -139,7 +131,6 @@ async function openCam(){
   image.classList.remove('visible');
   await sleep(500);
 }
-
 async function openFumee(){
   overlay.classList.add('show');
   await sleep(800);
@@ -151,7 +142,6 @@ async function openFumee(){
   image.classList.remove('visible');
   await sleep(500);
 }
-
 async function openCarnet(){
   image.src='carnet.png';
   image.classList.add('blur');
@@ -163,12 +153,19 @@ async function openCarnet(){
   await sleep(500);
 }
 
+function interpretation(first){
+  if(first==='caméra') return 'Vous commencez par la preuve. Voir avant de comprendre.';
+  if(first==='fumée') return 'Vous pensez aux conséquences avant l’acte.';
+  if(first==='carnet') return 'Vous commencez par les écrits d’Inès. Ce qu’elle note compte plus que ce qu’on montre.';
+  return '';
+}
+
 async function final(){
   const first=order[0];
-  const firstTxt = first==='cam'? 'la caméra' : first==='fumee'? 'la fumée' : 'le carnet';
-  text.innerHTML=`Vous aviez dit ${choix}.<br>Toujours ok avec ça?<br><br>Vous avez regardé ${firstTxt} en premier.`;
+  const interp=interpretation(first);
+  text.innerHTML=`Vous aviez dit ${choix}.<br>Toujours ok avec ça?<br><small>Vous avez regardé ${first} en 1er.<br>${interp}</small>`;
   text.classList.add('visible');
-  await sleep(4000);
+  await sleep(6000);
   restart.classList.add('visible');
 }
 </script>
