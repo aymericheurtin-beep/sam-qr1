@@ -17,10 +17,6 @@ p{font-size:22px;line-height:1.4;max-width:650px}
 <body>
 <button id="btn">Touchez pour commencer</button>
 
-<div id="meta" class="screen">
-  <p>Fermez les yeux 5 secondes. Imaginez la cantine bruyante, la bousculade, le plateau qui vole, et Noé qui lance : « T'as une tête à courir plus vite que tu réfléchis ».</p>
-</div>
-
 <div id="post" class="screen">
   <p>Comparez les sons que vous aviez imaginés avec ceux entendus.</p>
   <button id="restart">Recommencer</button>
@@ -32,7 +28,6 @@ p{font-size:22px;line-height:1.4;max-width:650px}
 const btn=document.getElementById('btn');
 const restart=document.getElementById('restart');
 const audio=document.getElementById('audio');
-const meta=document.getElementById('meta');
 const post=document.getElementById('post');
 
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
@@ -43,13 +38,8 @@ btn.onclick=()=>{
   localStorage.setItem('scans_used',u);
   
   btn.style.display='none';
-  meta.classList.add('active');
-  
-  setTimeout(()=>{
-    meta.classList.remove('active');
-    audio.volume=1;
-    audio.play().catch(()=>alert('Activez le son'));
-  },5000);
+  audio.volume=1;
+  audio.play().catch(()=>alert('Activez le son'));
 }
 
 audio.onended=()=>{
