@@ -104,13 +104,13 @@ async function run(){
   const repCadenas = await askSingle('Le cadenas, vous l’aviez imaginé comment ?', [
     'Un cadenas à chiffres',
     'Un cadenas à clé',
-    'Un autre type de cadenas'
+    'Autre chose'
   ]);
   localStorage.setItem('qr9_cadenas', repCadenas);
 
   if(qr1){
     if(qr1 === repCadenas){
-      await showText(`C’est bien, vous vous en souvenez.\nLa dernière fois : ${qr1}`,3500,'center');
+      await showText(`Bien joué, vous vous en êtes souvenus...\nLa dernière fois : ${qr1}`,3500,'center');
     }else{
       await showText(`Étonnant.\nLa dernière fois vous aviez dit : ${qr1}`,3500,'center');
     }
