@@ -100,6 +100,8 @@ async function showText(txt,hold=2000){
 async function sequence(){
   await showText('vendredi 8h27<br>collège les Peupliers Blancs',2500);
   annonce.play().catch(()=>{});
+  // préchargement webp
+  ['cam.webp','fumee.webp','carnet.webp'].forEach(s=>{const i=new Image();i.src=s;});
   await sleep(4200);
   await sleep(3000);
   await showText('8h30. Bureau de Mme Arnaud.',2000);
@@ -124,7 +126,7 @@ thumbs.addEventListener('click',async e=>{
 });
 
 async function openCam(){
-  image.src='cam.png';
+  image.src='cam.webp';
   image.classList.remove('blur');
   image.classList.add('visible');
   await sleep(6000);
@@ -135,7 +137,7 @@ async function openFumee(){
   overlay.classList.add('show');
   await sleep(800);
   overlay.classList.remove('show');
-  image.src='fumee.png';
+  image.src='fumee.webp';
   image.classList.remove('blur');
   image.classList.add('visible');
   await sleep(4000);
@@ -143,7 +145,7 @@ async function openFumee(){
   await sleep(500);
 }
 async function openCarnet(){
-  image.src='carnet.png';
+  image.src='carnet.webp';
   image.classList.add('blur');
   image.classList.add('visible');
   await sleep(3000);
