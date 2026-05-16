@@ -81,17 +81,16 @@ function ask(question, options){
 async function sequence(){
   start.classList.add('hidden');
 
-  // Autonomisation + mémoire inter-QR
   let used=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',used);
   localStorage.setItem('qr10_done','1');
 
-  // Phase 1 : son seul 8s
+  // Phase 1
   a1.play().catch(()=>{});
   await sleep(8000);
   a1.pause();
 
-  // Phase 2 : métacognition pré-image
+  // Phase 2
   const repCouloir = await ask("T'as imaginé quoi ?",[
     "Un couloir blanc",
     "Quelque chose de plus sombre",
@@ -99,7 +98,7 @@ async function sequence(){
   ]);
   localStorage.setItem('qr10_couloir', repCouloir);
 
-  // Phase 3 : la porte
+  // Phase 3
   image.src='portechambre.webp';
   image.classList.add('visible');
   await sleep(3000);
@@ -113,7 +112,7 @@ async function sequence(){
   count.classList.remove('visible');
   text.classList.remove('visible');
 
-  // Phase 4 : question active
+  // Phase 4
   image.classList.remove('visible');
   await sleep(300);
   await ask("T'as retenu quoi dans cette pièce ?",[
@@ -121,7 +120,7 @@ async function sequence(){
     "Quelque chose de précis"
   ]);
 
-  // Phase 5 : Rémy
+  // Phase 5
   a2.play().catch(()=>{});
   await sleep(8000);
   a2.pause();
@@ -134,18 +133,26 @@ async function sequence(){
   video.classList.remove('visible');
   video.pause();
 
+  // Winamax + vibreur : vu par Inès ET Sam
   image.src='winamax.webp';
   image.classList.add('visible');
+  text.className='bottom visible';
+  text.textContent='Le téléphone vibre.\nInès et Sam le voient.';
   a3.play().catch(()=>{});
   await sleep(3000);
   image.classList.remove('visible');
+  text.classList.remove('visible');
 
+  // Virement : seule Inès le voit
   image.src='ittversement.webp';
   image.classList.add('visible');
+  text.className='bottom visible';
+  text.textContent='Le virement.\nSeule Inès le voit.';
   await sleep(4000);
   image.classList.remove('visible');
+  text.classList.remove('visible');
 
-  // Phase 7 : retournement métacognitif
+  // Phase 7
   await showText("T'avais imaginé un couloir comment, déjà ?",2500);
   const rep = localStorage.getItem('qr10_couloir') || '...';
   await showText(`Tu avais dit : ${rep}.`,3500);
