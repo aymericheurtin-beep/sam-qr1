@@ -5,87 +5,118 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QR9 - Sam</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
-.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
-#start{animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
-#text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .8s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
-#text.bottom{bottom:8vmin;top:auto;font-size:4.5vmin;padding:3vmin}
-#image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;transition:opacity 1.5s;z-index:9997}
-#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
-.visible{opacity:1!important}
-.hidden{display:none!important}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
+.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
+.choice input{width:4vmin;height:4vmin}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
 </style>
 </head>
 <body>
-<button id="start" class="btn">Touchez pour commencer</button>
-<div id="text"></div>
-<img id="image" src="mains.webp" alt="Mains d'Inès, baskets trouées de Dubois en arrière-plan">
-<button id="restart" class="btn">Recommencer</button>
+<button id="start">Touchez pour entrer</button>
+<button id="restart">Recommencer</button>
 
-<audio id="audio1" src="audio_vidal.mp3" preload="auto"></audio>
-<audio id="audio2" src="cadenas_troisfois.mp3" preload="auto"></audio>
-<audio id="audio3" src="audio_inesnoe.mp3" preload="auto"></audio>
+<div id="text"></div>
+<div id="choices"></div>
+<img id="image" alt="">
+
+<audio id="a1" src="cadenas_troisfois.mp3" preload="auto"></audio>
+<audio id="a2" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="a3" src="audio_vidal.mp3" preload="auto"></audio>
 
 <script>
-const start=document.getElementById('start');
-const text=document.getElementById('text');
-const image=document.getElementById('image');
-const restart=document.getElementById('restart');
-const audio1=document.getElementById('audio1');
-const audio2=document.getElementById('audio2');
-const audio3=document.getElementById('audio3');
+const $ = id => document.getElementById(id);
+const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image');
+const a1 = $('a1'), a2 = $('a2'), a3 = $('a3');
 
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const show = el => el.style.display = 'block';
+const hide = el => el.style.display = 'none';
+const flex = el => el.style.display = 'flex';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function show(txt,hold=2000,pos='center'){
-  text.className='';
-  if(pos==='bottom') text.classList.add('bottom');
-  text.textContent=txt;
-  text.classList.add('visible');
-  await sleep(hold);
-  text.classList.remove('visible');
-  await sleep(400);
+function showText(t, hold=3000, pos='center'){
+  text.className=''; text.classList.add(pos);
+  text.textContent=t; show(text);
+  return sleep(hold).then(()=>hide(text));
 }
 
-async function sequence(){
-  start.classList.add('hidden');
+function askSingle(q, opts){
+  return new Promise(async res=>{
+    text.className='center'; text.textContent=q; show(text);
+    await sleep(500);
+    choices.innerHTML='';
+    opts.forEach(o=>{
+      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
+      b.onclick=()=>{ hide(text); hide(choices); res(o); };
+      choices.appendChild(b);
+    });
+    flex(choices);
+  });
+}
 
-  let used=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',used);
+async function play(a){ try{ await a.play(); }catch{} }
+
+async function run(){
+  hide(start); hide(restart);
+
+  // Autonomisation
+  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
+  localStorage.setItem('scans_used', used);
   localStorage.setItem('qr9_done','1');
 
-  audio1.play().catch(()=>{});
+  // Phase 1 : son seul + consigne
+  await showText('Fermez les yeux.\nÉcoutez.',2500,'center');
+  await play(a1); await sleep(8000); a1.pause(); a1.currentTime=0;
+
+  // Phase 2 : métacognition vestiaire
+  const repVestiaire = await askSingle("Qu'est-ce que vous avez vu dans votre tête ?", ["Un vestiaire propre","Sombre et humide","Rien de précis"]);
+  localStorage.setItem('qr9_vestiaire', repVestiaire);
+
+  // Phase 3 : confrontation image globale
+  image.src='vestiaire.jpg'; show(image);
+  text.className='bottom'; text.textContent='Voici le vestiaire'; show(text);
   await sleep(5000);
-  await sleep(1000);
+  hide(image); hide(text);
 
-  await show('Fermez les yeux.\nVestiaires. Métal froid.\nCorps mouillé et frigorifié.',4000);
+  // Phase 4 : question cadenas
+  const repCadenas = await askSingle('Le cadenas — vous aviez imaginé quoi ?', [
+    'Un cadenas à chiffres',
+    'Un cadenas à clé',
+    'Rien de précis',
+    'Autre chose'
+  ]);
+  localStorage.setItem('qr9_cadenas', repCadenas);
 
-  text.className='bottom visible';
-  text.textContent='Il vérifie. Une fois. Deux fois. Trois fois.';
-  audio2.play().catch(()=>{});
-  await sleep(4000);
-  text.classList.remove('visible');
+  // Phase 5 : détail mains / cadenas
+  image.src='mains.webp'; show(image);
+  await sleep(3000);
+  hide(image);
 
-  image.classList.add('visible');
-  await sleep(6000);
-  image.classList.remove('visible');
-  await sleep(800);
+  // Inter-QR avec QR1
+  const qr1 = localStorage.getItem('qr1_cadenas');
+  if(qr1){
+    await showText(`Dans le QR1 vous aviez choisi : ${qr1}`,3500,'center');
+  }
 
-  audio3.play().catch(()=>{});
-  await sleep(5000);
+  // Phase 6 : Inès / Noé
+  await showText('Écoutez.',1500,'center');
+  await play(a2); await sleep(8000); a2.pause(); a2.currentTime=0;
 
-  // pause 1.8s avant la question
-  await sleep(1800);
+  // Phase 7 : Vidal
+  await showText('Puis.',1500,'center');
+  await play(a3); await sleep(8000); a3.pause(); a3.currentTime=0;
 
-  await show('Avez-vous imaginé la scène différemment ?',4500);
-
-  restart.classList.add('visible');
+  show(restart);
 }
 
-start.onclick=()=>sequence();
-restart.onclick=()=>location.reload();
+start.onclick = run;
+restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
