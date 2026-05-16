@@ -3,94 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR1 - Sam</title>
+<title>QR1</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:8%}
-#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 1s ease;padding:40px}
+.screen.active{display:flex}
+.screen.fadeout{opacity:0}
+img,video{max-width:90%;max-height:70vh;object-fit:contain}
+#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
+#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;transition:opacity 1s ease;opacity:0}
+#restartBtn.show{opacity:1}
+p{font-size:22px;line-height:1.4;max-width:600px}
+.choiceBtn{background:#111;color:#fff;border:1px solid #fff;padding:15px 25px;font-size:18px;border-radius:8px;cursor:pointer;width:280px}
+.choiceBtn:active{transform:scale(0.98)}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
-<button id="restart">Recommencer</button>
+<button id="startBtn">Touchez pour commencer</button>
+<button id="restartBtn">Recommencer</button>
 
-<div id="text"></div>
-<div id="choices"></div>
-<img id="image" alt="">
+<div id="meta" class="screen">
+  <p>Fermez les yeux 5 secondes. Imaginez Sam qui court. Puis regardez.</p>
+</div>
 
-<audio id="a1" src="audio_sam1.mp3" preload="auto"></audio>
+<div id="s0" class="screen">
+  <video id="v0" src="audio/courir.mp4" playsinline muted></video>
+</div>
+
+<!-- Question méta cadenas ajoutée avant l'image -->
+<div id="qCadenas" class="screen">
+  <p>Comment voyez-vous le cadenas ?</p>
+  <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px">
+    <button class="choiceBtn" data-val="Un cadenas à chiffres">Un cadenas à chiffres</button>
+    <button class="choiceBtn" data-val="Un cadenas à clé">Un cadenas à clé</button>
+    <button class="choiceBtn" data-val="Je ne m’en souviens pas">Je ne m’en souviens pas</button>
+  </div>
+</div>
+
+<div id="s1" class="screen">
+  <img src="main.webp" alt="">
+</div>
+<div id="s2" class="screen">
+  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline></video>
+</div>
+<div id="s3" class="screen">
+  <p>Comparez avec ce que vous aviez imaginé.</p>
+</div>
+
+<audio id="a2" src="audio/p2-sam.mp3"></audio>
+<audio id="a3" src="audio/p3-toc.mp3"></audio>
+<audio id="a4" src="audio/p4-absence.mp3"></audio>
 
 <script>
-const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image');
-const a1 = $('a1');
+const meta=document.getElementById('meta');
+const s0=document.getElementById('s0');
+const s1=document.getElementById('s1');
+const s2=document.getElementById('s2');
+const s3=document.getElementById('s3');
+const qCadenas=document.getElementById('qCadenas');
+const v0=document.getElementById('v0');
+const v1=document.getElementById('v1');
+const a2=document.getElementById('a2');
+const a3=document.getElementById('a3');
+const a4=document.getElementById('a4');
+const startBtn=document.getElementById('startBtn');
+const restartBtn=document.getElementById('restartBtn');
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const PAUSE = 1200;
 
-function showText(t, hold=3000, pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-  return sleep(hold).then(()=>hide(text));
+// Comptage autonomisation
+let t=parseInt(localStorage.getItem('scans_total')||0)+1;
+localStorage.setItem('scans_total',t);
+
+startBtn.onclick=()=>{
+  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',u);
+  
+  startBtn.remove();
+  meta.classList.add('active');
+  setTimeout(()=>{
+    meta.classList.add('fadeout');
+    setTimeout(()=>{
+      meta.classList.remove('active','fadeout');
+      step0();
+    },1000);
+  },5000);
 }
 
-function askSingle(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{ hide(text); hide(choices); res(o); };
-      choices.appendChild(b);
-    });
-    flex(choices);
+function step0(){
+  s0.classList.add('active');
+  v0.play().catch(e=>console.log('Video courir error:',e));
+  a2.play().catch(e=>console.log('Audio2 error:',e));
+  
+  setTimeout(()=>{
+    v0.pause();
+    s0.classList.add('fadeout');
+  },5000);
+  
+  a2.onended=()=>{
+    setTimeout(()=>{
+      s0.classList.remove('active','fadeout');
+      showQuestionCadenas();
+    }, 500);
+  }
+}
+
+function showQuestionCadenas(){
+  qCadenas.classList.add('active');
+  document.querySelectorAll('#qCadenas .choiceBtn').forEach(btn=>{
+    btn.onclick=()=>{
+      const val = btn.dataset.val;
+      localStorage.setItem('qr1_cadenas', val);
+      qCadenas.classList.add('fadeout');
+      setTimeout(()=>{
+        qCadenas.classList.remove('active','fadeout');
+        step1();
+      },1000);
+    }
   });
 }
 
-async function play(a){ try{ await a.play(); }catch{} }
-
-async function run(){
-  hide(start); hide(restart);
-
-  // Autonomisation
-  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
-  localStorage.setItem('scans_used', used);
-  localStorage.setItem('qr1_done','1');
-
-  // Intro Sam
-  image.src='sam.jpg'; show(image);
-  await showText('Sam ouvre son casier pour la première fois.',3000,'bottom');
-  hide(image);
-
-  // Audio
-  await play(a1);
-  await sleep(8000);
-  a1.pause(); a1.currentTime=0;
-
-  // Question pont cadenas
-  const choix = await askSingle('Le cadenas que Sam manipule, vous l’imaginez comment ?', [
-    'Un cadenas à chiffres',
-    'Un cadenas à clé',
-    'Je ne m’en souviens pas'
-  ]);
-  localStorage.setItem('qr1_cadenas', choix);
-
-  // Fin
-  await showText('Votre choix est enregistré.',2000,'center');
-  show(restart);
+function step1(){
+  s1.classList.add('active');
+  a3.play().catch(e=>console.log('Audio3 error:',e));
+  a3.onended=()=>{
+    s1.classList.add('fadeout');
+    setTimeout(()=>{
+      s1.classList.remove('active','fadeout');
+      step2();
+    }, 1000);
+  }
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+function step2(){
+  setTimeout(()=>{
+    s2.classList.add('active');
+    a4.play().catch(e=>console.log('Audio4 error:',e));
+    a4.onended=()=>{
+      setTimeout(()=>{
+        v1.play().catch(e=>console.log('Video trounoir error:',e));
+      }, 800);
+    }
+  }, PAUSE);
+}
+
+v1.onended=()=>{
+  s2.classList.add('fadeout');
+  setTimeout(()=>{
+    s2.classList.remove('active','fadeout');
+    s3.classList.add('active');
+    setTimeout(()=>{
+      s3.classList.add('fadeout');
+      setTimeout(()=>{
+        restartBtn.style.display='block';
+        setTimeout(()=>restartBtn.classList.add('show'), 50);
+      },1000);
+    },3000);
+  },1000);
+}
+
+restartBtn.onclick=()=>{location.reload()};
 </script>
 </body>
 </html>
