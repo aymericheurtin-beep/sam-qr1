@@ -7,194 +7,85 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
-.btn{font-size:4vmin;padding:3vmin 6vmin;background:#222;border:1px solid #fff;border-radius:8px;color:#fff;cursor:pointer;margin:1vmin;z-index:9999}
-.btn.validate{background:#fff;color:#000}
-#start{animation:blink 1.5s infinite;background:#fff;color:#000;border:none}
+.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
+#start{animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
-#text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .6s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
-#text.bottom{bottom:8vmin;top:auto;font-size:4.2vmin;padding:3vmin}
-#choices{position:absolute;top:55%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998;width:80vmin}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin 3vmin;font-size:4vmin;cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
-#image,#video{position:absolute;max-width:90vmin;max-height:90vmin;object-fit:contain;opacity:0;transition:opacity .8s;z-index:9997}
-#count{position:absolute;bottom:6vmin;right:6vmin;font-size:6vmin;font-family:monospace;opacity:0;z-index:9998}
+#text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .8s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#text.bottom{bottom:8vmin;top:auto;font-size:4.5vmin;padding:3vmin}
+#image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;transition:opacity 1.5s;z-index:9997}
+#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
 .visible{opacity:1!important}
 .hidden{display:none!important}
-.small{font-size:3.2vmin;opacity:.7;margin-top:1vmin;text-align:center}
 </style>
 </head>
 <body>
-<button id="start" class="btn">Touchez pour entrer</button>
+<button id="start" class="btn">Touchez pour commencer</button>
 <div id="text"></div>
-<div id="choices" class="hidden"></div>
-<img id="image" alt="">
-<video id="video" playsinline muted></video>
-<div id="count"></div>
+<img id="image" src="mains.webp" alt="Mains d'Inès, baskets trouées de Dubois en arrière-plan">
+<button id="restart" class="btn">Recommencer</button>
 
-<audio id="a1" src="vestiaire.mp3" preload="auto"></audio>
-<audio id="a2" src="remy_vestiaire.mp3" preload="auto"></audio>
-<audio id="a3" src="vibreur.mp3" preload="auto"></audio>
+<audio id="audio1" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="audio2" src="cadenas_troisfois.mp3" preload="auto"></audio>
+<audio id="audio3" src="audio_inesnoe.mp3" preload="auto"></audio>
 
 <script>
 const start=document.getElementById('start');
 const text=document.getElementById('text');
-const choices=document.getElementById('choices');
 const image=document.getElementById('image');
-const video=document.getElementById('video');
-const count=document.getElementById('count');
-const a1=document.getElementById('a1');
-const a2=document.getElementById('a2');
-const a3=document.getElementById('a3');
+const restart=document.getElementById('restart');
+const audio1=document.getElementById('audio1');
+const audio2=document.getElementById('audio2');
+const audio3=document.getElementById('audio3');
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-function showText(t,hold=2000,pos='center'){
+async function show(txt,hold=2000,pos='center'){
   text.className='';
-  if(pos!=='center') text.classList.add(pos);
-  text.textContent=t;
+  if(pos==='bottom') text.classList.add('bottom');
+  text.textContent=txt;
   text.classList.add('visible');
-  return sleep(hold).then(()=>{
-    text.classList.remove('visible');
-    return sleep(300);
-  });
-}
-
-function askSingle(question, options){
-  return new Promise(async resolve=>{
-    text.className='';
-    text.textContent=question;
-    text.classList.add('visible');
-    await sleep(600);
-    choices.innerHTML='';
-    options.forEach(opt=>{
-      const b=document.createElement('button');
-      b.className='btn';
-      b.textContent=opt;
-      b.onclick=()=>{
-        text.classList.remove('visible');
-        choices.classList.add('hidden');
-        choices.style.opacity=0;
-        resolve(opt);
-      };
-      choices.appendChild(b);
-    });
-    choices.classList.remove('hidden');
-    choices.classList.add('visible');
-  });
-}
-
-function askMulti(question, options, help='Vous pouvez cocher plusieurs réponses'){
-  return new Promise(async resolve=>{
-    text.className='';
-    text.textContent=question;
-    text.classList.add('visible');
-    await sleep(600);
-    choices.innerHTML='';
-    options.forEach(opt=>{
-      const label=document.createElement('label');
-      label.className='choice';
-      const cb=document.createElement('input');
-      cb.type='checkbox';
-      cb.value=opt;
-      label.appendChild(cb);
-      label.append(opt);
-      choices.appendChild(label);
-    });
-    const helpEl=document.createElement('div');
-    helpEl.className='small';
-    helpEl.textContent=help;
-    choices.appendChild(helpEl);
-
-    const val=document.createElement('button');
-    val.className='btn validate';
-    val.textContent='Valider';
-    val.onclick=()=>{
-      const sel=[...choices.querySelectorAll('input:checked')].map(i=>i.value);
-      text.classList.remove('visible');
-      choices.classList.add('hidden');
-      choices.style.opacity=0;
-      resolve(sel);
-    };
-    choices.appendChild(val);
-    choices.classList.remove('hidden');
-    choices.classList.add('visible');
-  });
+  await sleep(hold);
+  text.classList.remove('visible');
+  await sleep(400);
 }
 
 async function sequence(){
   start.classList.add('hidden');
 
-  // Autonomisation
   let used=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',used);
   localStorage.setItem('qr9_done','1');
 
-  // Phase 1 : son seul vestiaire 8s
-  a1.play().catch(()=>{});
-  await sleep(8000);
-  a1.pause();
+  audio1.play().catch(()=>{});
+  await sleep(5000);
+  await sleep(1000);
 
-  // Phase 2 : métacognition pré-image
-  const repVestiaire = await askSingle("Vous avez imaginé quoi ?",[
-    "Un vestiaire propre",
-    "Sombre et humide",
-    "Rien de précis"
-  ]);
-  localStorage.setItem('qr9_vestiaire', repVestiaire);
+  await show('Fermez les yeux.\nVestiaires. Métal froid.\nCorps mouillé et frigorifié.',4000);
 
-  // Phase 3 : le cadenas + imagination guidée
-  image.src='cadenas.webp';
-  image.classList.add('visible');
-  await showText('Vestiaire. Sam entre.',2000,'bottom');
-  await showText('Alors, comment vous, vous avez imaginé la scène ?',3000);
-  await showText('Vous avez 10 secondes pour imaginer ce que Sam va voir et faire dans ce vestiaire',4000);
-  
-  count.classList.add('visible');
-  for(let i=10;i>=1;i--){
-    count.textContent=i;
-    await sleep(1000);
-  }
-  count.classList.remove('visible');
-  image.classList.remove('visible');
-
-  // Phase 4 : question active multi-choix
-  const retenu = await askMulti('Vous avez retenu quoi dans cette pièce ?',[
-    'Le cadenas',
-    'Le bruit des douches',
-    'Rémy qui parle',
-    'Le téléphone qui vibre',
-    'Autre'
-  ]);
-  localStorage.setItem('qr9_retenu', JSON.stringify(retenu));
-
-  // Phase 5 : Rémy
-  a2.play().catch(()=>{});
-  await sleep(8000);
-  a2.pause();
-
-  // Phase 6 : le comptage / geste
-  video.src='compteur.mp4';
-  video.classList.add('visible');
-  video.play().catch(()=>{});
-  await sleep(4000);
-  video.classList.remove('visible');
-  video.pause();
-
-  // Phase 6b : téléphone qui vibre - vu par Sam seul
-  image.src='cadenas.webp';
-  image.classList.add('visible');
   text.className='bottom visible';
-  text.textContent='Le téléphone vibre.\nSam le voit seul.';
-  a3.play().catch(()=>{});
-  await sleep(3000);
-  image.classList.remove('visible');
+  text.textContent='Il vérifie. Une fois. Deux fois. Trois fois.';
+  audio2.play().catch(()=>{});
+  await sleep(4000);
   text.classList.remove('visible');
 
-  // Fin : écran noir
-  await showText(' ',500);
+  image.classList.add('visible');
+  await sleep(6000);
+  image.classList.remove('visible');
+  await sleep(800);
+
+  audio3.play().catch(()=>{});
+  await sleep(5000);
+
+  // pause 1.8s avant la question
+  await sleep(1800);
+
+  await show('Avez-vous imaginé la scène différemment ?',4500);
+
+  restart.classList.add('visible');
 }
 
 start.onclick=()=>sequence();
+restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
