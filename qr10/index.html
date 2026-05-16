@@ -3,19 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR10 - Sam</title>
+<title>QR9 - Sam</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
 .btn{font-size:4vmin;padding:3vmin 6vmin;background:#222;border:1px solid #fff;border-radius:8px;color:#fff;cursor:pointer;margin:1vmin;z-index:9999}
-.btn.validate{background:#fff;color:#000}
 #start{animation:blink 1.5s infinite;background:#fff;color:#000;border:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 #text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .6s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
 #text.bottom{bottom:8vmin;top:auto;font-size:4.2vmin;padding:3vmin}
-#choices{position:absolute;top:55%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998;width:80vmin}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin 3vmin;font-size:4vmin;cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
+#choices{position:absolute;top:60%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998}
 #image,#video{position:absolute;max-width:90vmin;max-height:90vmin;object-fit:contain;opacity:0;transition:opacity .8s;z-index:9997}
 #count{position:absolute;bottom:6vmin;right:6vmin;font-size:6vmin;font-family:monospace;opacity:0;z-index:9998}
 .visible{opacity:1!important}
@@ -30,9 +27,8 @@ body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;wid
 <video id="video" playsinline muted></video>
 <div id="count"></div>
 
-<audio id="a1" src="couloirhopital2.mp3" preload="auto"></audio>
-<audio id="a2" src="Remy.mp3" preload="auto"></audio>
-<audio id="a3" src="vibreur.mp3" preload="auto"></audio>
+<audio id="a1" src="vestiaire.mp3" preload="auto"></audio>
+<audio id="a2" src="remy_vestiaire.mp3" preload="auto"></audio>
 
 <script>
 const start=document.getElementById('start');
@@ -43,7 +39,6 @@ const video=document.getElementById('video');
 const count=document.getElementById('count');
 const a1=document.getElementById('a1');
 const a2=document.getElementById('a2');
-const a3=document.getElementById('a3');
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -58,7 +53,7 @@ function showText(t,hold=2000,pos='center'){
   });
 }
 
-function askSingle(question, options){
+function ask(question, options){
   return new Promise(async resolve=>{
     text.className='';
     text.textContent=question;
@@ -82,115 +77,61 @@ function askSingle(question, options){
   });
 }
 
-function askMulti(question, options){
-  return new Promise(async resolve=>{
-    text.className='';
-    text.textContent=question;
-    text.classList.add('visible');
-    await sleep(600);
-    choices.innerHTML='';
-    options.forEach(opt=>{
-      const label=document.createElement('label');
-      label.className='choice';
-      const cb=document.createElement('input');
-      cb.type='checkbox';
-      cb.value=opt;
-      label.appendChild(cb);
-      label.append(opt);
-      choices.appendChild(label);
-    });
-    const val=document.createElement('button');
-    val.className='btn validate';
-    val.textContent='Valider';
-    val.onclick=()=>{
-      const sel=[...choices.querySelectorAll('input:checked')].map(i=>i.value);
-      text.classList.remove('visible');
-      choices.classList.add('hidden');
-      choices.style.opacity=0;
-      resolve(sel);
-    };
-    choices.appendChild(val);
-    choices.classList.remove('hidden');
-    choices.classList.add('visible');
-  });
-}
-
 async function sequence(){
   start.classList.add('hidden');
 
+  // Autonomisation
   let used=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',used);
-  localStorage.setItem('qr10_done','1');
+  localStorage.setItem('qr9_done','1');
 
-  // Phase 1 : son seul 8s
+  // Phase 1 : son seul vestiaire 8s
   a1.play().catch(()=>{});
   await sleep(8000);
   a1.pause();
 
-  // Phase 2 : métacognition pré-image
-  const repCouloir = await askSingle("T'as imaginé quoi ?",[
-    "Un couloir blanc",
-    "Quelque chose de plus sombre",
-    "Rien de précis"
+  // Phase 2 : imagerie guidée + métacognition
+  await showText('Fermez les yeux.\nVestiaires.',2500);
+  const repVestiaire = await ask("Vous comptez aussi ?",[
+    "Oui, je compte",
+    "Non",
+    "Je ne sais pas"
   ]);
-  localStorage.setItem('qr10_couloir', repCouloir);
+  localStorage.setItem('qr9_compte', repVestiaire);
 
-  // Phase 3 : la porte + imagination guidée
-  image.src='portechambre.webp';
+  // Phase 3 : cadenas
+  image.src='cadenas.webp';
   image.classList.add('visible');
-  await showText('Chambre 214. Inès et Sam entrent.',2000,'bottom');
-  await showText('Alors, comment vous, vous avez imaginé la scène ?',3000);
-  await showText('Vous avez 10 secondes pour imaginer ce qu’Inès et Sam vont voir et découvrir dans cette chambre',4000);
-  
+  await sleep(1000);
+  text.className='bottom visible';
+  text.textContent='Le cadenas.\nSam hésite.';
   count.classList.add('visible');
-  for(let i=10;i>=1;i--){
+  for(let i=8;i>=1;i--){
     count.textContent=i;
     await sleep(1000);
   }
   count.classList.remove('visible');
+  text.classList.remove('visible');
   image.classList.remove('visible');
 
-  // Phase 4 : question active multi-choix
-  const retenu = await askMulti('Vous avez retenu quoi dans cette pièce ?\nVous pouvez cocher plusieurs réponses',[
-    'La montre',
-    'Le téléphone',
-    'Rémy dans son lit',
-    'Autre'
+  // Phase 4 : question active
+  await sleep(300);
+  await ask("Vous avez imaginé la scène différemment ?",[
+    "Oui",
+    "Non",
+    "Je ne sais pas"
   ]);
-  localStorage.setItem('qr10_retenu', JSON.stringify(retenu));
 
   // Phase 5 : Rémy
   a2.play().catch(()=>{});
   await sleep(8000);
   a2.pause();
 
-  // Phase 6 : le vol + téléphones
-  video.src='montre_poche.mp4';
-  video.classList.add('visible');
-  video.play().catch(()=>{});
-  await sleep(4000);
-  video.classList.remove('visible');
-  video.pause();
-
-  image.src='winamax.webp';
-  image.classList.add('visible');
-  text.className='bottom visible';
-  text.textContent='Le téléphone vibre.\nInès et Sam le voient.';
-  a3.play().catch(()=>{});
-  await sleep(3000);
-  image.classList.remove('visible');
-  text.classList.remove('visible');
-
-  image.src='ittversement.webp';
-  image.classList.add('visible');
-  text.className='bottom visible';
-  text.textContent='Le virement s’affiche.\nSeule Inès le voit.';
-  await sleep(4000);
-  image.classList.remove('visible');
-  text.classList.remove('visible');
-
-  // Fin : écran noir
-  await showText(' ',500);
+  // Phase 6 : retournement métacognitif
+  await showText("Vous comptiez aussi, déjà ?",2500);
+  const rep = localStorage.getItem('qr9_compte') || '...';
+  await showText(`Vous aviez dit : ${rep}.`,3500);
+  await showText('Sam, lui, compte toujours.',3500);
 }
 
 start.onclick=()=>sequence();
