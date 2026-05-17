@@ -11,8 +11,8 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
 #text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:26%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:58vh;overflow-y:auto;padding-bottom:2vmin;z-index:35;-webkit-overflow-scrolling:touch}
-.btn{font-size:3.8vmin;padding:2.4vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
 .btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
 #image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
@@ -155,7 +155,7 @@ async function run(){
     MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
   };
-  const DISPLAY_TIME = 4500;
+  const DISPLAY_TIME = 6500;
   let opened=0;
   await new Promise(res=>{
     carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
@@ -170,7 +170,7 @@ async function run(){
         if(opened===3){
           setTimeout(async ()=>{
             hide(carnetBox);await hideImage();hide(carnetLine);res();
-          }, DISPLAY_TIME + 200);
+          }, DISPLAY_TIME + 300);
         }
       };
     });
@@ -197,7 +197,6 @@ async function run(){
     new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
     new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
   ]);
-  // Stopper les sons avant la suite
   stopAudio(aKey);
   stopAudio(aPage);
   await hideImage();
