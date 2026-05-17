@@ -2,11 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>QR11 - Bureau Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden;-webkit-user-select:none;user-select:none}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:200;-webkit-tap-highlight-color:transparent}
 #restart{display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.4;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:10%}
@@ -35,8 +35,8 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 </div>
 <div id="carnetLine"></div>
 
-<audio id="aKey" src="bruitkey.mp3" preload="auto"></audio>
-<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto"></audio>
+<audio id="aKey" src="bruitkey.mp3" preload="auto" playsinline></audio>
+<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -101,12 +101,14 @@ async function typeWords(lines,delay=600){
   await sleep(1200);hide(text);
 }
 
+let started=false;
 async function run(){
+  if(started) return;
+  started=true;
   try{
     hide(start);hide(restart);
     localStorage.setItem('qr11_done','1');
 
-    // Phase1
     await showImage('crochetage_vidal2.webp');
     await sleep(3000);
     showTextStay('Confinement. YouTube.
@@ -114,7 +116,6 @@ C'est illégal.
 C'est pratique.','bottom');
     await sleep(3500);hide(text);hideImage();
 
-    // Phase2
     const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.
 Vous imaginez quoi ?',[
       'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
@@ -125,7 +126,6 @@ Vous imaginez quoi ?',[
     showTextStay('Voici un bureau','bottom');
     await sleep(3000);hide(text);hideImage();
 
-    // Phase3
     await showImage('bureau_vidal.jpg');
     await sleep(800);
     flex(carnetBox);
@@ -151,7 +151,6 @@ Vous imaginez quoi ?',[
       });
     });
 
-    // Phase4
     await showImage('vidal_jeune.webp');
     await sleep(5000);
     await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
@@ -161,7 +160,6 @@ Vous imaginez quoi ?',[
     localStorage.setItem('qr11_vidal',repVidal);
     hideImage();
 
-    // Phase5
     await showImage('vidal_jeune.webp');
     play(aKey);
     await sleep(1500);
@@ -171,14 +169,12 @@ Vous imaginez quoi ?',[
     await sleep(4000);
     hideImage();
 
-    // Phase6
     await typeWords(['Silence.','Son coupé net.'],700);
     const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',[
       'La peur','l'excitation','autre chose'
     ]);
     localStorage.setItem('qr11_feel',repFeel);
 
-    // Phase7
     const bureauTxt = localStorage.getItem('qr11_bureau')||'';
     const vidalTxt = localStorage.getItem('qr11_vidal')||'';
     const firstCarnet = localStorage.getItem('qr11_carnet_first')||'';
@@ -200,6 +196,7 @@ Sam, lui, a mis du temps à reconnaître les épaules.`,3500,'center');
 }
 
 start.addEventListener('click',run);
+start.addEventListener('touchstart',e=>{e.preventDefault();run();},{passive:false});
 restart.addEventListener('click',()=>location.reload());
 </script>
 </body>
