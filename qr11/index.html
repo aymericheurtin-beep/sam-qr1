@@ -20,6 +20,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 .carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
 .carnetBtn.used{opacity:.4}
 #carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 #hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
@@ -78,6 +79,7 @@ function hideImage(){
   });
 }
 async function play(a){try{await a.play();}catch{}}
+function stopAudio(a){try{a.pause();a.currentTime=0;}catch{}}
 
 function askMulti(q,opts){
   return new Promise(res=>{
@@ -149,7 +151,7 @@ async function run(){
   flex(carnetBox);
 
   const carnetTexts={
-    LAVELOT:"LAVELOT S. : Moteur exceptionnel, profil explosif. Trop instable pour les France. Il ira pas si j'ai mon mot à dire.",
+    LAVELOT:"<u><u>LAVELOT S.</u></u> : Moteur exceptionnel, profil explosif. Trop instable pour les France. Il ira pas si j'ai mon mot à dire.",
     MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
   };
@@ -161,7 +163,7 @@ async function run(){
         if(btn.classList.contains('used'))return;
         btn.classList.add('used');
         const id=btn.dataset.id;
-        carnetLine.textContent=carnetTexts[id];
+        carnetLine.innerHTML = carnetTexts[id];
         show(carnetLine);
         setTimeout(()=>hide(carnetLine), DISPLAY_TIME);
         opened++;
@@ -195,6 +197,9 @@ async function run(){
     new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
     new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
   ]);
+  // Stopper les sons avant la suite
+  stopAudio(aKey);
+  stopAudio(aPage);
   await hideImage();
 
   await showImage('souslatable.jpg');
