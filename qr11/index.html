@@ -14,7 +14,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 #choices{position:absolute;top:26%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:58vh;overflow-y:auto;padding-bottom:2vmin;z-index:35;-webkit-overflow-scrolling:touch}
 .btn{font-size:3.8vmin;padding:2.4vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0}
 .btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
 #image.zoomed{max-width:none;max-height:none;width:220vmin;height:auto;top:55%;left:50%;transform:translate(-50%,-50%);z-index:60}
 #carnetBox{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:40vh;overflow-y:auto}
 .carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:#000;border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
@@ -38,8 +38,8 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 <div id="carnetLine"></div>
 <div id="hint"></div>
 
-<audio id="aKey" src="bruitkey.mp3" preload="auto"></audio>
-<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto"></audio>
+<audio id="aKey" src="bruitkey.mp3" preload="auto" playsinline></audio>
+<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -62,13 +62,21 @@ function showTextStay(t,pos='center'){
 }
 function showImage(src){
   return new Promise(res=>{
-    image.onload=()=>{show(image);res();};
-    image.onerror=()=>{show(image);res();};
+    image.onload=()=>{show(image); image.style.opacity='1'; res();};
+    image.onerror=()=>{show(image); res();};
     image.classList.remove('zoomed');
-    image.src=src;
+    image.style.opacity='0';
+    setTimeout(()=>{image.src=src;},50);
   });
 }
-function hideImage(){hide(image);hide(hint);image.src='';image.classList.remove('zoomed');}
+function hideImage(){
+  return new Promise(async res=>{
+    image.style.opacity='0';
+    await sleep(1200);
+    hide(image);hide(hint);image.src='';image.classList.remove('zoomed');
+    res();
+  });
+}
 async function play(a){try{await a.play();}catch{}}
 
 function askMulti(q,opts){
@@ -121,11 +129,13 @@ async function run(){
   hide(start);hide(restart);
   localStorage.setItem('qr11_done','1');
 
+  // 1. Crochetage
   await showImage('crochetage_vidal.jpg');
-  await sleep(3000);
+  await sleep(4000);
   showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
-  await sleep(3500);hide(text);hideImage();
+  await sleep(3500);hide(text);await hideImage();
 
+  // 2. Bureau imagination
   const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
@@ -133,16 +143,16 @@ async function run(){
 
   await showImage('bureau_vidal.jpg');
   await showText('Voici un bureau',3000,'bottom');
-  hideImage();
+  await hideImage();
 
-  // Phase carnet imposée
+  // 3. Zoom imposé sur carnet
   await showImage('bureau_vidal.jpg');
   hint.textContent='Appuyez sur le carnet';
   show(hint);
   await waitImageTap();
   hide(hint);
   image.classList.add('zoomed');
-  await sleep(300);
+  await sleep(800); // plus de temps avant apparition des noms
   flex(carnetBox);
 
   const carnetTexts={
@@ -163,38 +173,44 @@ async function run(){
         setTimeout(()=>hide(carnetLine),2500);
         opened++;
         if(opened===3){
-          // Attendre que la dernière ligne disparaisse avant de continuer
-          setTimeout(()=>{
-            hide(carnetBox);hideImage();hide(carnetLine);res();
+          setTimeout(async ()=>{
+            hide(carnetBox);await hideImage();hide(carnetLine);res();
           },2600);
         }
       };
     });
   });
 
+  // 4. Vidal jeune lecture
   await showImage('vidal_jeune.webp');
   await sleep(5000);
-  await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
-  hideImage(); // éviter propositions sur l'image
+  await hideImage();
+
   const repVidal = await askSingle('Vous l\'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l\'avais pas imaginé']);
   localStorage.setItem('qr11_vidal',repVidal);
 
-  // Transition clés + carnet
-  await showImage('vidal_jeune.webp');
-  play(aKey);
-  await sleep(1500);
-  hideImage();
-  await showImage('photo_carnet.webp');
-  play(aPage);
-  await sleep(4000);
-  hideImage();
-
-  await typeWords(['Silence.','Son coupé net.'],700);
   const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
   localStorage.setItem('qr11_feel',repFeel);
 
-  // Fin sans récapitulatif "vous avez choisi..."
-  await showText('Sam, lui, pense à la mandarine.',3000,'center');
+  // 5. Séquence finale : Vidal + clés + carnet + sous table
+  await sleep(800); // petit temps après réponse
+  await showImage('vidal_jeune.webp');
+  await sleep(5000);
+  play(aKey);
+  await sleep(1500);
+  await hideImage();
+  await showImage('photo_carnet.webp');
+  play(aPage);
+  // attendre fin des deux sons
+  await Promise.all([
+    new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
+    new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
+  ]);
+  await hideImage();
+
+  await showImage('souslatable.jpg');
+  await sleep(4000);
+  await hideImage();
 
   show(restart);
 }
