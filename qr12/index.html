@@ -112,9 +112,9 @@ async function run(){
     try{
       const arr = JSON.parse(qr11BureauRaw);
       if(arr.includes(repAmbiance)){
-        await showText('Tiens, comme la salle de M. Vidal que vous aviez imaginée.',3000,'center');
+        await showText('Tiens, comme le bureau de M. Vidal.',3000,'center');
       }else{
-        await showText('Tiens, différemment de la salle de M. Vidal que vous aviez vue.',3000,'center');
+        await showText('Tiens, différemment du bureau de M. Vidal.',3000,'center');
       }
     }catch{}
   }
@@ -147,15 +147,34 @@ async function run(){
       await sleep(4000);
       hide(charLine);
       await hideImage();
-      await phase5();
+      await phase4();
     };
     charBox.appendChild(b);
   });
   flex(charBox);
 }
 
-async function phase5(){
-  await showText('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.\nVous pourrez scanner à nouveau à la fin de ce chapitre. La version sera peut-être différente...',6000,'center');
+async function phase4(){
+  // Résultat de l'autonomisation
+  const qr11First = localStorage.getItem('qr11_carnet_first');
+  const qr9Vest = localStorage.getItem('qr9_vestiaire');
+  const qr8First = localStorage.getItem('qr8_first');
+
+  if(qr11First){
+    await showText(`Dans le carnet de Vidal, vous aviez lu ${qr11First} en premier.\nCe personnage est dans cette pièce.`,4000,'center');
+    await sleep(1000);
+  }
+  if(qr9Vest){
+    await showText(`Au vestiaire, vous comptiez ${qr9Vest}.\nSam a arrêté de compter aujourd'hui.`,4000,'center');
+    await sleep(1000);
+  }
+  if(qr8First){
+    await showText(`Dans le bureau d'Arnaud, vous aviez regardé ${qr8First} en premier.\nInès, elle, avait regardé les chaussures.`,4000,'center');
+    await sleep(1000);
+  }
+
+  // Phase 5
+  await showText('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.\nVous pourrez scanner à nouveau à la fin de ce chapitre. La version sera peut-être différente...',7000,'center');
   
   localStorage.setItem('qr12_done','true');
   show(restart);
