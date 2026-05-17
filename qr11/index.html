@@ -63,7 +63,7 @@ function showTextStay(t,pos='center'){
 function showImage(src){
   return new Promise(res=>{
     image.onload=()=>{show(image); image.style.opacity='1'; res();};
-    image.onerror=()=>{show(image); res();};
+    image.onerror=()=>{console.warn('Image manquante:',src); show(image); res();};
     image.classList.remove('zoomed');
     image.style.opacity='0';
     setTimeout(()=>{image.src=src;},50);
@@ -188,7 +188,7 @@ async function run(){
   const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
   await sleep(1500);
   await hideImage();
-  await showImage('photo_carnet.webp');
+  await showImage('phot_carnet.webp');
   play(aPage);
   await feelPromise;
   await Promise.all([
