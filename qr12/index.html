@@ -10,7 +10,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Courier N
 #restart{display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.4;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:10%}
-#text.bottom{bottom:8%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:50vh;overflow-y:auto;z-index:40}
 .btn{font-size:4vmin;padding:2.6vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
 .btn.sel{background:#fff;color:#000}
@@ -89,20 +88,13 @@ function askMulti(q,opts){
 
 async function run(){
   hide(start); hide(restart);
-  const dejaVu = localStorage.getItem('qr12_done');
 
-  if(dejaVu){
-    await showText('Vous avez déjà parcouru ce QR.',3000,'center');
-    show(restart);
-    return;
-  }
-
-  // Phase 1
+  // Phase 1 - amorce sonore
   await play(narrateur);
   await new Promise(r=>{narrateur.onended=r; setTimeout(r,8000);});
   await sleep(3000);
 
-  // Phase 2
+  // Phase 2 - métacognition
   const opts = ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
   const rep = await askMulti('Avant d\'entrer — vous imaginez cette pièce comment ?', opts);
   localStorage.setItem('qr12_ambiance', JSON.stringify(rep));
@@ -121,7 +113,7 @@ async function run(){
     }catch{}
   }
 
-  // Phase 3
+  // Phase 3 - focalisation
   await showImage('touslessuspects.jpg');
   await sleep(5000);
   consigne.textContent = 'Touchez le personnage qui vous intéresse le plus.';
@@ -144,7 +136,6 @@ async function run(){
       charBox.style.display='none';
       hide(consigne);
 
-      // Pont avec QR11 premier choix carnet
       const qr11First = localStorage.getItem('qr11_carnet_first');
       if(qr11First && qr11First.toLowerCase() === p.id.toLowerCase()){
         await showText('Il vous intrigue... vous avez fait le même premier choix que dans le bureau de M. Vidal.',4000,'center');
@@ -164,8 +155,6 @@ async function run(){
 
 async function phase5(){
   await showText('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.\nVous pourrez scanner à nouveau à la fin de ce chapitre. La version sera peut-être différente...',7000,'center');
-  
-  localStorage.setItem('qr12_done','true');
   show(restart);
 }
 
