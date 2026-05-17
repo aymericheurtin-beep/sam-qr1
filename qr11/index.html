@@ -8,17 +8,17 @@
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden}
 #start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:10%}
-#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:30%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2vmin;width:88%;z-index:35}
-.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;top:26%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:58vh;overflow-y:auto;padding-bottom:2vmin;z-index:35;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0}
 .btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
-#carnetBox{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.5vmin;z-index:40}
-.carnetBtn{font-size:3.6vmin;padding:2vmin;background:#000;border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center}
+#carnetBox{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:40;max-height:40vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:#000;border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
 .carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.8vmin;text-align:center;display:none;z-index:45}
+#carnetLine{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:45}
 </style>
 </head>
 <body>
@@ -77,10 +77,11 @@ function askMulti(q,opts){
       b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); };
       choices.appendChild(b);
     });
-    const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.marginTop='2vmin';
+    const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.marginTop='1vmin';ok.style.background='#fff';ok.style.color='#000';
     ok.onclick=()=>{hide(text);hide(choices);res([...sel]);};
     choices.appendChild(ok);
     flex(choices);
+    choices.scrollTop=0;
   });
 }
 function askSingle(q,opts){
@@ -93,6 +94,7 @@ function askSingle(q,opts){
       choices.appendChild(b);
     });
     flex(choices);
+    choices.scrollTop=0;
   });
 }
 async function typeWords(lines,delay=600){
@@ -105,13 +107,11 @@ async function run(){
   hide(start);hide(restart);
   localStorage.setItem('qr11_done','1');
 
-  // Phase 1
   await showImage('crochetage_vidal.jpg');
   await sleep(3000);
   showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
   await sleep(3500);hide(text);hideImage();
 
-  // Phase 2
   const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
@@ -121,7 +121,6 @@ async function run(){
   await showText('Voici un bureau',3000,'bottom');
   hideImage();
 
-  // Phase 3 carnet
   await showImage('bureau_vidal.jpg');
   await sleep(800);
   flex(carnetBox);
@@ -147,7 +146,6 @@ async function run(){
     });
   });
 
-  // Phase 4 Vidal
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
@@ -155,7 +153,6 @@ async function run(){
   localStorage.setItem('qr11_vidal',repVidal);
   hideImage();
 
-  // Phase 5 transition
   await showImage('vidal_jeune.webp');
   play(aKey);
   await sleep(1500);
@@ -165,12 +162,10 @@ async function run(){
   await sleep(4000);
   hideImage();
 
-  // Phase 6 ressenti
   await typeWords(['Silence.','Son coupé net.'],700);
   const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
   localStorage.setItem('qr11_feel',repFeel);
 
-  // Phase 7 recap
   const bureauTxt = localStorage.getItem('qr11_bureau')||'';
   const vidalTxt = localStorage.getItem('qr11_vidal')||'';
   const firstCarnet = localStorage.getItem('qr11_carnet_first')||'';
