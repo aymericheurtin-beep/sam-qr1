@@ -15,11 +15,11 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 .btn{font-size:3.8vmin;padding:2.4vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0}
 .btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
-#image.zoomed{max-width:none;max-height:none;width:220vmin;height:auto;top:55%;left:50%;transform:translate(-50%,-50%);z-index:60}
-#carnetBox{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:40vh;overflow-y:auto}
-.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:#000;border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+#image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
 .carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:75}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:75}
 #hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
@@ -109,11 +109,6 @@ function askSingle(q,opts){
     choices.scrollTop=0;
   });
 }
-async function typeWords(lines,delay=600){
-  show(text);text.className='center';text.textContent='';
-  for(const l of lines){text.textContent+=(text.textContent?'\n':'')+l;await sleep(delay);}
-  await sleep(1200);hide(text);
-}
 
 function waitImageTap(){
   return new Promise(res=>{
@@ -127,7 +122,6 @@ function waitImageTap(){
 
 async function run(){
   hide(start);hide(restart);
-  localStorage.setItem('qr11_done','1');
 
   // 1. Crochetage
   await showImage('crochetage_vidal.jpg');
@@ -139,20 +133,19 @@ async function run(){
   const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
-  localStorage.setItem('qr11_bureau',repBureau.join(', '));
 
   await showImage('bureau_vidal.jpg');
   await showText('Voici un bureau',3000,'bottom');
   await hideImage();
 
-  // 3. Zoom imposé sur carnet
+  // 3. Zoom imposé carnet
   await showImage('bureau_vidal.jpg');
   hint.textContent='Appuyez sur le carnet';
   show(hint);
   await waitImageTap();
   hide(hint);
   image.classList.add('zoomed');
-  await sleep(800); // plus de temps avant apparition des noms
+  await sleep(1000);
   flex(carnetBox);
 
   const carnetTexts={
@@ -160,14 +153,13 @@ async function run(){
     MOREL:"MOREL : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS : Court comme un frigo qui aurait oublié ses roulettes."
   };
-  let first=null, opened=0;
+  let opened=0;
   await new Promise(res=>{
     carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
       btn.onclick=()=>{
         if(btn.classList.contains('used'))return;
         btn.classList.add('used');
         const id=btn.dataset.id;
-        if(!first){first=id;localStorage.setItem('qr11_carnet_first',id);}
         carnetLine.textContent=carnetTexts[id];
         show(carnetLine);
         setTimeout(()=>hide(carnetLine),2500);
@@ -181,27 +173,25 @@ async function run(){
     });
   });
 
-  // 4. Vidal jeune lecture
+  // 4. Vidal lecture
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   await hideImage();
 
   const repVidal = await askSingle('Vous l\'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l\'avais pas imaginé']);
-  localStorage.setItem('qr11_vidal',repVidal);
 
-  const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
-  localStorage.setItem('qr11_feel',repFeel);
-
-  // 5. Séquence finale : Vidal + clés + carnet + sous table
-  await sleep(800); // petit temps après réponse
+  // 5. Séquence finale : vidal + clés + question ressenti + carnet + sous table
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   play(aKey);
-  await sleep(1500);
+  // Question ressenti arrive au moment des clés
+  const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
+  // Après réponse, on attend un peu puis switch vers carnet
+  await sleep(500);
   await hideImage();
   await showImage('photo_carnet.webp');
   play(aPage);
-  // attendre fin des deux sons
+  // Attendre fin des sons (max 4s)
   await Promise.all([
     new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
     new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
