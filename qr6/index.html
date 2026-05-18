@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -89,12 +90,14 @@ choices.forEach(b => {
     setTimeout(() => eye.classList.add('show'), 50);
     scanOverlay.classList.add('active');
     
-    scannerA.volume = 1.0;
-    scannerB.volume = 0.65;
+    scannerA.volume = 0.45;
+    scannerB.volume = 0.25;
+    voix.volume = 1.0;
+    
     scannerA.currentTime = 0;
     scannerB.currentTime = 0;
-    scannerA.play().catch(()=>console.log('scanA blocked'));
-    setTimeout(()=> scannerB.play().catch(()=>console.log('scanB blocked')), 180);
+    scannerA.play().catch(()=>{});
+    setTimeout(()=> scannerB.play().catch(()=>{}), 180);
     
     setTimeout(()=>{
       voix.play().catch(()=>{
