@@ -6,11 +6,11 @@
 <title>QR8 - Sam</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+body{background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
 .btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
 #start{animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
-#text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;z-index:9998}
 #text small{display:block;font-size:3.2vmin;color:#aaa;margin-top:2vmin;line-height:1.3}
 #image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
 #restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
@@ -26,6 +26,26 @@ body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;wid
 #overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity.3s}
 #overlay.show{opacity:1;pointer-events:auto}
 .blur{filter:blur(12px)}
+</style>
+<style>
+/* === UNIFICATION TYPO === */
+html,body,button,input,select,textarea {
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+p, #text, .screen p, #question, #msg {
+  font-size:clamp(20px,4.5vmin,28px) !important;
+  line-height:1.45 !important;
+}
+button, .btn, .choiceBtn, .choice, .carnetBtn {
+  font-size:clamp(18px,4vmin,24px) !important;
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+#startBtn, #start, #btn, #restartBtn, #restart {
+  font-size:clamp(20px,5vmin,26px) !important;
+}
+small, .sub, #recall, #hint, #carnetLine {
+  font-size:clamp(16px,3.2vmin,20px) !important;
+}
 </style>
 </head>
 <body>
