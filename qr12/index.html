@@ -1,162 +1,155 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>QR12</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR12 - Chapitre 16</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Courier New',monospace;overflow:hidden}
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);font-size:4.5vmin;padding:3vmin 7vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.4;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:3vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:200}
+#restart{display:none;top:auto;bottom:8vmin}
+#image{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);max-width:92vmin;max-height:70vmin;display:none;z-index:10}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.4;z-index:50;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:12%}
-#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:50vh;overflow-y:auto;z-index:40}
-.btn{font-size:4vmin;padding:2.6vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+#text.top{top:8%}
+#choices{position:absolute;top:30%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2vmin;width:88%;z-index:60;max-height:60vh;overflow:auto}
+.btn{font-size:clamp(18px,4vmin,24px);padding:2.8vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
 .btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;z-index:10;display:none;opacity:0;transition:opacity 1s}
-#image.show{opacity:1}
-#charBox{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-wrap:wrap;gap:1.2vmin;width:92%;justify-content:center;z-index:50}
-.charBtn{font-size:3.4vmin;padding:1.6vmin 2.2vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer}
-#charLine{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:55}
-#consigne{position:absolute;top:8%;left:50%;transform:translateX(-50%);font-size:3.6vmin;text-align:center;z-index:45;display:none;white-space:pre-line}
+#charBar{position:absolute;bottom:8vmin;left:50%;transform:translateX(-50%);display:none;flex-wrap:wrap;gap:1.5vmin;justify-content:center;width:94%;z-index:60}
+#charBar .btn{padding:2vmin 3vmin;font-size:clamp(16px,3.5vmin,22px)}
+#stats{position:absolute;bottom:18vmin;left:50%;transform:translateX(-50%);text-align:center;font-size:clamp(16px,3.2vmin,20px);line-height:1.5;display:none;z-index:50;max-width:90%}
 </style>
 </head>
 <body>
 <button id="start">Touchez pour entrer</button>
-<button id="restart">Recommencer</button>
-
+<img id="image" alt="">
 <div id="text"></div>
 <div id="choices"></div>
-<img id="image" alt="">
-<div id="consigne"></div>
-<div id="charBox"></div>
-<div id="charLine"></div>
-
-<audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-
+<div id="charBar"></div>
+<div id="stats"></div>
+<button id="restart">Recommencer</button>
+<audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
 <script>
-const $=id=>document.getElementById(id);
-const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), charBox=$('charBox'), charLine=$('charLine'), consigne=$('consigne'), narrateur=$('narrateur');
+const start=document.getElementById('start');
+const restart=document.getElementById('restart');
+const image=document.getElementById('image');
+const text=document.getElementById('text');
+const choices=document.getElementById('choices');
+const charBar=document.getElementById('charBar');
+const stats=document.getElementById('stats');
+const narrateur=document.getElementById('narrateur');
 
-const show=el=>el.style.display='block';
-const hide=el=>el.style.display='none';
-const flex=el=>el.style.display='flex';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function show(el){el.style.display='block'}
+function hide(el){el.style.display='none'}
+function showText(msg,pos='center'){text.className='';text.classList.add(pos);text.textContent=msg;show(text)}
+function hideText(){hide(text)}
 
-function showText(t,hold=3000,pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-  return sleep(hold).then(()=>hide(text));
-}
-function showTextStay(t,pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-}
-function showImage(src){
-  return new Promise(res=>{
-    image.onload=()=>{show(image); requestAnimationFrame(()=>image.classList.add('show')); res();};
-    image.onerror=()=>{show(image); image.classList.add('show'); res();};
-    image.src=src;
+async function askMulti(q,opts){
+  showText(q,'center');
+  choices.innerHTML='';
+  const sel=new Set();
+  opts.forEach(o=>{
+    const b=document.createElement('button');b.className='btn';b.textContent=o;
+    b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o);};
+    choices.appendChild(b);
   });
+  const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.background='#fff';ok.style.color='#000';
+  ok.onclick=()=>{hideText();hide(choices);res([...sel]);};
+  choices.appendChild(ok);
+  choices.style.display='flex';
+  return new Promise(res=>{ ok.onclick=()=>{hideText();hide(choices);res([...sel]);}; });
 }
-function hideImage(){
-  return new Promise(async res=>{
-    image.classList.remove('show');
-    await sleep(1000);
-    hide(image); image.src='';
-    res();
-  });
-}
-async function play(a){try{await a.play();}catch{}}
 
-function askMulti(q,opts){
-  return new Promise(res=>{
-    showTextStay(q,'center');
-    choices.innerHTML='';
-    const sel=new Set();
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o);};
-      choices.appendChild(b);
-    });
-    const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Valider'; ok.style.marginTop='1vmin'; ok.style.background='#fff'; ok.style.color='#000';
-    ok.onclick=()=>{hide(text); hide(choices); res([...sel]);};
-    choices.appendChild(ok);
-    flex(choices);
-  });
-}
+const charDesc={
+  Vidal:"Bras croisés. La montre neuve. Il attend que ça finisse.",
+  Noé:"Regard sur ses chaussures. La posture des mauvais jours.",
+  Rémy:"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
+  Chloé:"Elle arrive en dernier. Sa démarche quand elle est stressée.",
+  Colin:"Mains dans les poches. Il regarde personne en particulier.",
+  Sam:"Assis au centre. Il regarde Inès.",
+  Inès:"Debout. Elle a demandé à être debout."
+};
+
+function normalize(s){return s.toLowerCase().replace('é','e').replace('è','e');}
 
 async function run(){
-  hide(start); hide(restart);
-
-  await play(narrateur);
-  await new Promise(r=>{narrateur.onended=r; setTimeout(r,8000);});
-  await sleep(3000);
-
-  const opts = ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
-  const rep = await askMulti('Avant d\'entrer — vous imaginez cette pièce comment ?', opts);
-  localStorage.setItem('qr12_ambiance', JSON.stringify(rep));
-
-  const qr11Raw = localStorage.getItem('qr11_bureau');
-  if(qr11Raw){
-    try{
-      const arr = JSON.parse(qr11Raw).map(s=>s.toLowerCase());
-      const repLow = rep.map(s=>s.toLowerCase());
-      const inter = repLow.filter(x=>arr.includes(x));
-      if(inter.length>0){
-        await showText('Tiens, comme la salle de M. Vidal.',3500,'center');
-      }else{
-        await showText('Tiens, différemment de la salle de M. Vidal.',3500,'center');
-      }
-    }catch{}
+  if(localStorage.getItem('qr12_done')){
+    showText('Vous avez déjà parcouru ce QR.','center');
+    restart.style.display='block';
+    return;
   }
-
-  await showImage('touslessuspects.jpg');
+  hide(start);
+  // Phase 1 audio
+  try{await narrateur.play();await new Promise(r=>{narrateur.onended=r;setTimeout(r,6000);});}catch{}
+  await sleep(3000);
+  // Phase 2 question pièce
+  const opts=['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
+  const rep=await askMulti('Avant d’entrer — vous imaginez cette pièce comment ?',opts);
+  // Pont QR11
+  let qr11b=[];
+  try{qr11b=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');}catch{}
+  const map={petite:'petit',grande:'grand',lumineuse:'lumineux',sombre:'sombre',ordonnée:'ordonné', 'en bazar':'en bazar'};
+  const repNorm=rep.map(r=>map[normalize(r)]||normalize(r));
+  const overlap=repNorm.some(r=>qr11b.map(normalize).includes(r));
+  showText(overlap?'Tiens, comme le bureau de M. Vidal.':'Tiens, différemment du bureau de M. Vidal.','center');
+  await sleep(2500);hideText();
+  // Phase 3 image 5s
+  image.src='touslessuspects.jpg';
+  show(image);
   await sleep(5000);
-  consigne.textContent = 'Touchez le personnage qui vous intéresse le plus.';
-  show(consigne);
-
-  const persos = [
-    {id:'Vidal', line:'Vidal : Bras croisés. La montre neuve. Il attend que ça finisse.'},
-    {id:'Noé', line:'Noé : Regard sur ses chaussures. La posture des mauvais jours.'},
-    {id:'Rémy', line:'Rémy : Bras bandé de l\'épaule aux doigts. Il aurait préféré rester à l\'hôpital.'},
-    {id:'Chloé', line:'Chloé : Elle arrive en dernier. Sa démarche quand elle est stressée.'},
-    {id:'Colin', line:'Colin : Mains dans les poches. Il regarde personne en particulier.'},
-    {id:'Sam', line:'Sam : Assis au centre. Il regarde Inès.'},
-    {id:'Inès', line:'Inès : Debout. Elle a demandé à être debout.'}
-  ];
-  charBox.innerHTML='';
-  persos.forEach(p=>{
-    const b=document.createElement('button'); b.className='charBtn'; b.textContent=p.id;
-    b.onclick=async ()=>{
-      localStorage.setItem('qr12_focus', p.id);
-      charBox.style.display='none';
-      hide(consigne);
-
-      const qr11First = localStorage.getItem('qr11_carnet_first');
-      if(qr11First && qr11First.toLowerCase() === p.id.toLowerCase()){
-        await showText('Ce personnage vous intrigue... vous aviez choisi '+qr11First+' en premier dans le carnet de M. Vidal.',4000,'center');
-      }
-
-      charLine.textContent = p.line;
-      show(charLine);
-      await sleep(6500);
-      hide(charLine);
-      await hideImage();
-      await phase5();
-    };
-    charBox.appendChild(b);
+  // Consigne + boutons
+  showText('Touchez le personnage qui vous intéresse le plus.','top');
+  charBar.innerHTML='';
+  Object.keys(charDesc).forEach(name=>{
+    const b=document.createElement('button');b.className='btn';b.textContent=name;
+    b.onclick=()=>chooseChar(name);
+    charBar.appendChild(b);
   });
-  flex(charBox);
+  charBar.style.display='flex';
 }
 
-async function phase5(){
-  showTextStay('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.','center');
-  show(restart);
+async function chooseChar(name){
+  charBar.style.display='none';
+  hideText();
+  hide(image);
+  const firstCarnet=localStorage.getItem('qr11_first_carnet');
+  let extra='';
+  if(firstCarnet && normalize(firstCarnet)===normalize(name)){
+    extra="
+
+Ce personnage doit vous intriguer, vous l’aviez choisi en premier dans le carnet de M. Vidal.";
+  }
+  // refs qr9 / qr8
+  let ref='';
+  const qr9=localStorage.getItem('qr9_vestiaire');
+  if(qr9){ref+=`
+
+Au vestiaire, vous comptiez ${qr9}. Sam a arrêté de compter aujourd’hui.`;}
+  const qr8=localStorage.getItem('qr8_first');
+  if(qr8){ref+=`
+
+Dans le bureau d’Arnaud, vous aviez regardé ${qr8} en premier. Inès, elle, avait regardé les chaussures.`;}
+  showText(charDesc[name]+extra+ref,'center');
+  await sleep(6000);
+  hideText();
+  // Phase 5 instruction
+  showText('Dans quelques secondes vous allez lire la suite du roman. Chaque personnage dans cette pièce a une raison d’être là. Vous aussi vous savez des choses sur eux. Utilisez-les.','center');
+  await sleep(7000);
+  hideText();
+  // stats
+  const total=parseInt(localStorage.getItem('scans_total')||'12');
+  const used=parseInt(localStorage.getItem('scans_used')||'0');
+  const solo=Math.max(0,total-used);
+  stats.innerHTML=`Scans proposés : ${total}<br>Scans utilisés : ${used}<br>Imagination seule : ${solo}`;
+  show(stats);
+  localStorage.setItem('qr12_done','true');
+  restart.style.display='block';
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+start.onclick=run;
+restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
