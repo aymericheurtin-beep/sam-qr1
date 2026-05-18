@@ -53,8 +53,8 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   <button id="restart">Recommencer</button>
 </div>
 
-<audio id="scannerA" src="scanner.mp3" preload="auto" loop playsinline></audio>
-<audio id="scannerB" src="scanner.mp3" preload="auto" loop playsinline></audio>
+<audio id="scannerA" src="scan.mp3" preload="auto" loop playsinline></audio>
+<audio id="scannerB" src="scan.mp3" preload="auto" loop playsinline></audio>
 <audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
 
 <script>
@@ -90,11 +90,11 @@ choices.forEach(b => {
     scanOverlay.classList.add('active');
     
     scannerA.volume = 1.0;
-    scannerB.volume = 0.6;
+    scannerB.volume = 0.65;
     scannerA.currentTime = 0;
     scannerB.currentTime = 0;
-    scannerA.play().catch(()=>{});
-    setTimeout(()=> scannerB.play().catch(()=>{}), 180);
+    scannerA.play().catch(()=>console.log('scanA blocked'));
+    setTimeout(()=> scannerB.play().catch(()=>console.log('scanB blocked')), 180);
     
     setTimeout(()=>{
       voix.play().catch(()=>{
