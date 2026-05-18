@@ -100,6 +100,7 @@ small, .sub, #recall, #hint, #carnetLine {
         const media = document.getElementById('media');
         const restart = document.getElementById('restart');
         const audioNarrateur = document.getElementById('audioNarrateur');
+        const stats = document.getElementById('stats');
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         
@@ -129,21 +130,15 @@ small, .sub, #recall, #hint, #carnetLine {
             
             try {
                 await showImage('touslessuspects.png');
-                audioNarrateur.play();
-                await new Promise(r => audioNarrateur.onended = r);
+                audioNarrateur.play().catch(()=>{});
+                await new Promise(r => { audioNarrateur.onended = r; setTimeout(r,8000); });
                 await hideImage();
                 const total = parseInt(localStorage.getItem('scans_total')||'0');
                 const used = parseInt(localStorage.getItem('scans_used')||'0');
                 const solo = Math.max(0, total - used);
-                const stats = document.getElementById('stats');
                 stats.innerHTML = `QR proposés : ${total}<br>QR ouverts : ${used}<br>Vous avez choisi d'imaginer seul ${solo} fois.`;
                 stats.style.opacity = '1';
                 restart.classList.add('visible');
-            } catch(e) {
-                console.error('Erreur:', e);
-                restart.classList.add('visible');
-            }
-        }
             } catch(e) {
                 console.error('Erreur:', e);
                 restart.classList.add('visible');
