@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
-<title>QR12 - Chapitre 16</title>
+<title>QR11 - Bureau Vidal</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden}
 #start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.top{top:8%}
 #text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
 #choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
 .btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
 .btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
-#charBar{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-wrap:wrap;gap:1.2vmin;justify-content:center;z-index:70;max-height:30vh;overflow-y:auto}
-.charBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
-#stats{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn.used{opacity:.4}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
 #hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 <style>
@@ -30,14 +32,14 @@ p, #text, .screen p, #question, #msg {
   font-size:clamp(20px,4.5vmin,28px) !important;
   line-height:1.45 !important;
 }
-button, .btn, .choiceBtn, .choice, .charBtn {
+button, .btn, .choiceBtn, .choice, .carnetBtn {
   font-size:clamp(18px,4vmin,24px) !important;
   font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 #startBtn, #start, #btn, #restartBtn, #restart {
   font-size:clamp(20px,5vmin,26px) !important;
 }
-small, .sub, #recall, #hint, #stats {
+small, .sub, #recall, #hint, #carnetLine {
   font-size:clamp(16px,3.2vmin,20px) !important;
 }
 </style>
@@ -49,16 +51,21 @@ small, .sub, #recall, #hint, #stats {
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
-<div id="charBar"></div>
-<div id="stats"></div>
+<div id="carnetBox">
+  <button class="carnetBtn" data-id="LAVELOT">[ LAVELOT S. ]</button>
+  <button class="carnetBtn" data-id="MOREL">[ MOREL N. ]</button>
+  <button class="carnetBtn" data-id="DUBOIS">[ DUBOIS C. ]</button>
+</div>
+<div id="carnetLine"></div>
 <div id="hint"></div>
 
-<audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
+<audio id="aKey" src="bruitkey.mp3" preload="auto" playsinline></audio>
+<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
 
 <script>
 const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), charBar = $('charBar'), stats = $('stats'), hint=$('hint');
-const narrateur = $('narrateur');
+const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), carnetBox = $('carnetBox'), carnetLine = $('carnetLine'), hint=$('hint');
+const aKey = $('aKey'), aPage = $('aPage');
 
 const show = el => el.style.display = 'block';
 const hide = el => el.style.display = 'none';
@@ -78,6 +85,7 @@ function showImage(src){
   return new Promise(res=>{
     image.onload=()=>{show(image); image.style.opacity='1'; res();};
     image.onerror=()=>{console.warn('Image manquante:',src); show(image); res();};
+    image.classList.remove('zoomed');
     image.style.opacity='0';
     setTimeout(()=>{image.src=src;},50);
   });
@@ -86,7 +94,7 @@ function hideImage(){
   return new Promise(async res=>{
     image.style.opacity='0';
     await sleep(1200);
-    hide(image);hide(hint);image.src='';
+    hide(image);hide(hint);image.src='';image.classList.remove('zoomed');
     res();
   });
 }
@@ -124,88 +132,99 @@ function askSingle(q,opts){
   });
 }
 
-function normalize(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-
-const charDesc={
-  'Vidal':'Bras croisés. La montre neuve. Il attend que ça finisse.',
-  'Noé':'Regard sur ses chaussures. La posture des mauvais jours.',
-  'Rémy':'Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.',
-  'Chloé':'Elle arrive en dernier. Sa démarche quand elle est stressée.',
-  'Colin':'Mains dans les poches. Il regarde personne en particulier.',
-  'Sam':'Assis au centre. Il regarde Inès.',
-  'Inès':'Debout. Elle a demandé à être debout.'
-};
-
-async function run(){
-  if(localStorage.getItem('qr12_done')){
-    await showText('Vous avez déjà parcouru ce QR.',3000,'center');
-    show(restart);
-    return;
-  }
-  hide(start);hide(restart);
-
-  // 1. Narrateur
-  await play(narrateur);
-  await new Promise(r=>{narrateur.onended=r; setTimeout(r,6000);});
-  stopAudio(narrateur);
-  await sleep(3000);
-
-  // 2. Question pièce
-  const optsPiece=['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
-  const repPiece=await askMulti('Avant d’entrer — vous imaginez cette pièce comment ?',optsPiece);
-  
-  // Pont QR11
-  let qr11b=[];
-  try{qr11b=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');}catch{}
-  const map={petite:'petit',grande:'grand',lumineuse:'lumineux',sombre:'sombre',ordonnée:'ordonné','en bazar':'en bazar'};
-  const repNorm=repPiece.map(r=>map[normalize(r)]||normalize(r));
-  const qr11Norm=qr11b.map(normalize);
-  const overlap=repNorm.some(r=>qr11Norm.includes(r));
-  await showText(overlap?'Tiens, comme le bureau de M. Vidal.':'Tiens, différemment du bureau de M. Vidal.',2500,'center');
-
-  // 3. Tous les suspects 5s
-  await showImage('touslessuspects.jpg');
-  await sleep(5000);
-  
-  // Consigne + 7 personnages
-  showTextStay('Touchez le personnage qui vous intéresse le plus.','top');
-  charBar.innerHTML='';
-  Object.keys(charDesc).forEach(name=>{
-    const b=document.createElement('button');b.className='charBtn';b.textContent=name;
-    b.onclick=()=>chooseChar(name);
-    charBar.appendChild(b);
+function waitImageTap(){
+  return new Promise(res=>{
+    const handler=()=>{
+      image.removeEventListener('click',handler);
+      res();
+    };
+    image.addEventListener('click',handler);
   });
-  flex(charBar);
 }
 
-async function chooseChar(name){
-  hide(charBar);hide(text);
+async function run(){
+  hide(start);hide(restart);
+
+  // 1. Crochetage
+  await showImage('crochetage_vidal.jpg');
+  await sleep(4000);
+  showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
+  await sleep(3500);hide(text);await hideImage();
+
+  // 2. Bureau imagination
+  await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
+    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
+  ]);
+
+  await showImage('bureau_vidal.jpg');
+  await showText('Voici un bureau',3000,'bottom');
   await hideImage();
-  
-  const firstCarnet=localStorage.getItem('qr11_first_carnet');
-  let txt=charDesc[name];
-  if(firstCarnet && normalize(firstCarnet)===normalize(name)){
-    txt+="\n\nCe personnage doit vous intriguer, vous l’aviez choisi en premier dans le carnet de M. Vidal.";
-  }
-  // Refs QR9 / QR8
-  const qr9=localStorage.getItem('qr9_vestiaire');
-  if(qr9){txt+=`\n\nAu vestiaire, vous comptiez ${qr9}. Sam a arrêté de compter aujourd’hui.`;}
-  const qr8=localStorage.getItem('qr8_first');
-  if(qr8){txt+=`\n\nDans le bureau d’Arnaud, vous aviez regardé ${qr8} en premier. Inès, elle, avait regardé les chaussures.`;}
-  
-  await showText(txt,6000,'center');
-  
-  // 4. Instruction lecture
-  await showText('Dans quelques secondes vous allez lire la suite du roman. Chaque personnage dans cette pièce a une raison d’être là. Vous aussi vous savez des choses sur eux. Utilisez-les.',7000,'center');
-  
-  // 5. Stats
-  const total=parseInt(localStorage.getItem('scans_total')||'12');
-  const used=parseInt(localStorage.getItem('scans_used')||'0');
-  const solo=Math.max(0,total-used);
-  stats.innerHTML=`Scans proposés : ${total}<br>Scans utilisés : ${used}<br>Imagination seule : ${solo}`;
-  show(stats);
-  
-  localStorage.setItem('qr12_done','true');
+
+  // 3. Zoom imposé carnet
+  await showImage('bureau_vidal.jpg');
+  hint.textContent='Appuyez sur le carnet';
+  show(hint);
+  await waitImageTap();
+  hide(hint);
+  image.classList.add('zoomed');
+  await sleep(1000);
+  flex(carnetBox);
+
+  const carnetTexts={
+    LAVELOT:"<u><u>LAVELOT S.</u></u> : Moteur exceptionnel, profil explosif. Trop instable pour les France. Il ira pas si j'ai mon mot à dire.",
+    MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
+    DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
+  };
+  const DISPLAY_TIME = 12000;
+  let opened=0;
+  await new Promise(res=>{
+    carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
+      btn.onclick=()=>{
+        if(btn.classList.contains('used'))return;
+        btn.classList.add('used');
+        const id=btn.dataset.id;
+        carnetLine.innerHTML = carnetTexts[id];
+        show(carnetLine);
+        setTimeout(()=>hide(carnetLine), DISPLAY_TIME);
+        opened++;
+        if(opened===3){
+          setTimeout(async ()=>{
+            hide(carnetBox);await hideImage();hide(carnetLine);res();
+          }, DISPLAY_TIME + 300);
+        }
+      };
+    });
+  });
+
+  // 4. Vidal lecture
+  await showImage('vidal_jeune.webp');
+  await sleep(5000);
+  await hideImage();
+
+  await askSingle('Vous l\'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l\'avais pas imaginé']);
+
+  // 5. Séquence finale
+  await showImage('vidal_jeune.webp');
+  await sleep(5000);
+  play(aKey);
+  const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
+  await sleep(1500);
+  await hideImage();
+  await showImage('phot_carnet.webp');
+  play(aPage);
+  await feelPromise;
+  await Promise.all([
+    new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
+    new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
+  ]);
+  stopAudio(aKey);
+  stopAudio(aPage);
+  await hideImage();
+
+  await showImage('souslatable.jpg');
+  await sleep(4000);
+  await hideImage();
+
   show(restart);
 }
 
