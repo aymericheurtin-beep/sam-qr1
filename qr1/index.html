@@ -19,32 +19,18 @@ p{font-size:22px;line-height:1.4;max-width:600px}
 .choiceBtn:active{transform:scale(0.98)}
 </style>
 <style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+p,#text,.screen p,#question,#msg{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
+button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#startBtn,#start,#btn,#restartBtn,#restart{font-size:clamp(20px,5vmin,26px)!important}
+small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!important}
 </style>
 </head>
 <body>
 <button id="startBtn">Touchez pour commencer</button>
 <button id="restartBtn">Recommencer</button>
 
-<div id="meta" class="screen">
-</div>
+<div id="meta" class="screen"></div>
 
 <div id="s0" class="screen">
   <video id="v0" src="audio/courir.mp4" playsinline muted></video>
@@ -96,33 +82,24 @@ localStorage.setItem('scans_total',t);
 startBtn.onclick=()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
-  
   startBtn.remove();
-  meta.classList.add('active');
-  setTimeout(()=>{
-    meta.classList.add('fadeout');
-    setTimeout(()=>{
-      meta.classList.remove('active','fadeout');
-      step0();
-    },1000);
-  },5000);
+  // Démarrage rapide : on saute l'écran meta vide
+  step0();
 }
 
 function step0(){
   s0.classList.add('active');
   v0.play().catch(e=>console.log('Video courir error:',e));
   a2.play().catch(e=>console.log('Audio2 error:',e));
-  
   setTimeout(()=>{
     v0.pause();
     s0.classList.add('fadeout');
   },5000);
-  
   a2.onended=()=>{
     setTimeout(()=>{
       s0.classList.remove('active','fadeout');
       showQuestionCadenas();
-    }, 500);
+    },500);
   }
 }
 
@@ -149,7 +126,7 @@ function step1(){
     setTimeout(()=>{
       s1.classList.remove('active','fadeout');
       step2();
-    }, 1000);
+    },1000);
   }
 }
 
@@ -160,9 +137,9 @@ function step2(){
     a4.onended=()=>{
       setTimeout(()=>{
         v1.play().catch(e=>console.log('Video trounoir error:',e));
-      }, 800);
+      },800);
     }
-  }, PAUSE);
+  },PAUSE);
 }
 
 v1.onended=()=>{
@@ -174,7 +151,7 @@ v1.onended=()=>{
       s3.classList.add('fadeout');
       setTimeout(()=>{
         restartBtn.style.display='block';
-        setTimeout(()=>restartBtn.classList.add('show'), 50);
+        setTimeout(()=>restartBtn.classList.add('show'),50);
       },1000);
     },3000);
   },1000);
