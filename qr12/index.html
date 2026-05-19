@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QR12</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
@@ -18,204 +18,209 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 .choice input{width:4vmin;height:4vmin}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
-
-/* === Unification typo === */
-#text, .btn, .choice, #stats, #start, #restart{
-  font-kerning:normal;
-  text-rendering:optimizeLegibility;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  font-variant-ligatures:none;
-  letter-spacing:.01em;
-}
+/* Unification typo */
+.choice, .btn{font-family:inherit;font-size:4vmin;line-height:1.35}
 </style>
 </head>
 <body>
-
-<button id="start">Touchez pour entrer</button>
+<button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
 <div id="stats"></div>
-<audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
+<audio id="narrateur" preload="auto" src="container:///mnt/data/narrateur_qr12.mp3"></audio>
+<img id="img_all" src="container:///mnt/data/touslessuspects.jpg" hidden>
+<img id="img_all_png" src="container:///mnt/data/touslessuspects.png" hidden>
+<img id="img_ines" src="container:///mnt/data/qr4_ines.jpg" hidden>
 
 <script>
 const $ = id => document.getElementById(id);
-const start = $('start');
-const restart = $('restart');
-const text = $('text');
-const choices = $('choices');
-const image = $('image');
-const stats = $('stats');
-const narrateur = $('narrateur');
+const show = el => el.style.display='block';
+const hide = el => el.style.display='none';
+const flex = el => el.style.display='flex';
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function showText(t, hold, pos='center'){
-  text.textContent = t;
-  text.className = '';
-  text.classList.add(pos);
-  show(text);
-  return sleep(hold).then(()=>hide(text));
+function showText(txt, pos='center'){
+  const t=$('text');
+  t.className=pos;
+  t.textContent=txt;
+  show(t);
+  hide($('choices'));
 }
-function showTextStay(t, pos='center'){
-  text.textContent = t;
-  text.className = '';
-  text.classList.add(pos);
-  show(text);
+
+function showTextStay(txt, pos='center'){
+  const t=$('text');
+  t.className=pos;
+  t.textContent=txt;
+  show(t);
 }
 
 function askSingle(q, opts){
-  return new Promise(resolve => {
-    choices.innerHTML = '';
-    if(q){
-      showTextStay(q,'center');
-    }else{
-      hide(text);
-    }
+  return new Promise(res=>{
+    if(q) showTextStay(q,'center');
+    const box=$('choices');
+    box.innerHTML='';
+    flex(box);
     opts.forEach(opt=>{
-      const b = document.createElement('button');
-      b.className = 'btn';
-      b.textContent = opt;
-      b.onclick = ()=>{
-        hide(choices);
-        hide(text);
-        resolve(opt);
+      const b=document.createElement('div');
+      b.className='btn';
+      b.textContent=opt;
+      b.onclick=()=>{
+        hide(box);
+        hide($('text'));
+        res(opt);
       };
-      choices.appendChild(b);
+      box.appendChild(b);
     });
-    flex(choices);
   });
 }
 
 function askMulti(q, opts){
-  return new Promise(resolve => {
-    choices.innerHTML = '';
-    showTextStay(q,'center');
-    const selected = new Set();
+  return new Promise(res=>{
+    showText(q,'center');
+    const box=$('choices');
+    box.innerHTML='';
+    flex(box);
+    const selected=new Set();
     opts.forEach(opt=>{
-      const lab = document.createElement('label');
-      lab.className = 'choice';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = opt;
-      cb.onchange = ()=>{ cb.checked ? selected.add(opt) : selected.delete(opt); };
-      const span = document.createElement('span');
-      span.textContent = opt;
-      lab.appendChild(cb);
-      lab.appendChild(span);
-      choices.appendChild(lab);
+      const label=document.createElement('label');
+      label.className='choice';
+      const cb=document.createElement('input');
+      cb.type='checkbox';
+      cb.onchange=()=>{
+        if(cb.checked) selected.add(opt);
+        else selected.delete(opt);
+      };
+      const span=document.createElement('span');
+      span.textContent=opt;
+      label.appendChild(cb);
+      label.appendChild(span);
+      label.onclick=(e)=>{
+        if(e.target!==cb){
+          cb.checked=!cb.checked;
+          cb.onchange();
+        }
+      };
+      box.appendChild(label);
     });
-    const val = document.createElement('button');
-    val.className = 'btn validate';
-    val.textContent = 'Valider';
-    val.onclick = ()=>{
-      hide(choices);
-      hide(text);
-      resolve([...selected]);
+    const btn=document.createElement('div');
+    btn.className='btn validate';
+    btn.textContent='Valider';
+    btn.onclick=()=>{
+      if(selected.size===0) return;
+      hide(box);
+      hide($('text'));
+      res(Array.from(selected));
     };
-    choices.appendChild(val);
-    flex(choices);
+    box.appendChild(btn);
   });
 }
 
-function play(a){
-  try{ a.currentTime = 0; return a.play().catch(()=>{}); }catch{}
+function play(id){
+  return new Promise(async resolve=>{
+    const a=$(id);
+    if(!a || !a.src) return resolve();
+    try{
+      await a.play();
+      a.onended=()=>resolve();
+    }catch(e){
+      resolve();
+    }
+    setTimeout(resolve,6000);
+  });
 }
 
-function normalize(s){
-  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+function normalize(arr){
+  return arr.map(s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")).sort();
 }
 
-const descriptions = {
-  'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
-  'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
-  'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
-  'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
-  'Colin': "Mains dans les poches. Il regarde personne en particulier.",
-  'Sam': "Assis au centre. Il regarde Inès.",
-  'Inès': "Debout. Elle a demandé à être debout."
+const descriptions={
+  'Vidal':"Vidal, 42 ans. Prof principal de la classe. Autoritaire, il impose une discipline stricte.",
+  'Noé':"Noé, 17 ans. Élève discret. Toujours au fond de la classe, il observe plus qu’il ne parle.",
+  'Rémy':"Rémy, 16 ans. Sportif populaire. Charismatique, mais impulsif quand on le contredit.",
+  'Chloé':"Chloé, 17 ans. Déléguée de classe. Organisée, elle note tout dans son carnet.",
+  'Colin':"Colin, 16 ans. Passionné d’informatique. Il passe son temps sur les ordinateurs du lycée.",
+  'Sam':"Sam, 17 ans. Artiste. Carnet de croquis toujours à portée de main.",
+  'Inès':"Inès, 16 ans. Nouvelle arrivée. Personne ne la connaît vraiment encore."
 };
 
 async function run(){
-  hide(start);
-  hide(restart);
-
-  if(localStorage.getItem('qr12_done')){
-    await showText('Vous avez déjà effectué ce scan.',2500,'center');
-    show(restart);
-    return;
-  }
-
-  const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
-  localStorage.setItem('scans_used', used);
-  localStorage.setItem('qr12_done','1');
-
-  const playP = play(narrateur);
-  await Promise.race([
-    new Promise(res=>{ narrateur.onended = res; }),
-    sleep(6000)
-  ]);
-
+  hide($('start'));
+  hide($('restart'));
+  hide($('stats'));
+  
+  await play('narrateur');
   await sleep(3000);
-
-  const piece = await askMulti("Comment imaginez-vous cette pièce ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-
-  let bureau = [];
-  try{ bureau = JSON.parse(localStorage.getItem('qr11_bureau')||'[]'); }catch{}
-
-  const map = { petite:'petit', grande:'grand', lumineuse:'lumineux', sombre:'sombre', ordonnee:'ordonne', 'en bazar':'en bazar' };
-  const norm = arr => arr.map(v=> map[normalize(v)] || normalize(v)).sort().join('|');
-  const same = norm(piece) === norm(bureau) && bureau.length>0;
-
-  await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.",2500,'center');
-
-  image.onerror = ()=>{
-    if(image.src.endsWith('.jpg')){
-      image.src = 'touslessuspects.png';
+  
+  const rep=await askMulti("Comment imaginez-vous cette pièce ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+  
+  const qr11bureau=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');
+  const a=normalize(rep);
+  const b=normalize(qr11bureau);
+  const identique=JSON.stringify(a)===JSON.stringify(b) && a.length>0;
+  
+  let pont="Votre vision correspond aux indices laissés sur place.";
+  if(!qr11bureau.length){
+    pont="Aucune observation préalable. Retenez bien ces détails.";
+  }else if(!identique){
+    const communs=a.filter(x=>b.includes(x));
+    const diffs=a.filter(x=>!b.includes(x)).concat(b.filter(x=>!a.includes(x)));
+    if(communs.length){
+      pont=`Points communs relevés : ${communs.join(', ')}. `;
+    }else{
+      pont=`Vos impressions divergent des indices notés. `;
     }
-  };
-  image.src = 'touslessuspects.jpg';
-  show(image);
+    if(diffs.length){
+      pont+=`Écarts : ${diffs.join(', ')}.`;
+    }
+  }
+  
+  await showText(pont,'bottom');
+  await sleep(4000);
+  hide($('text'));
+  
+  const img=$('image');
+  img.src=$('img_all').src;
+  img.onerror=()=>{img.src=$('img_all_png').src};
+  show(img);
   await sleep(5000);
-  hide(image);
-
+  hide(img);
+  
   showTextStay("Appuyez sur le personnage qui vous intéresse le plus.",'center');
-
-  const choice = await askSingle("", ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
-  hide(text);
-
-  let txt = descriptions[choice] || '';
-  const firstCarnet = localStorage.getItem('qr11_first_carnet')||'';
-  if(normalize(firstCarnet) === normalize(choice)){
-    txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+  const choix=await askSingle("", ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+  
+  const qr11first=localStorage.getItem('qr11_first_carnet');
+  let desc=descriptions[choix]||"";
+  if(qr11first && choix===qr11first){
+    desc+="\n\nVous l’aviez déjà repéré près du carnet.";
   }
-  await showText(txt,6000,'center');
-
-  if(choice === 'Inès' && localStorage.getItem('qr4_ines')){
-    image.src = localStorage.getItem('qr4_ines');
-    image.onerror = null;
-    show(image);
+  
+  showText(desc,'center');
+  await sleep(5000);
+  
+  if(choix==='Inès' && localStorage.getItem('qr4_ines')){
+    hide($('text'));
+    img.src=$('img_ines').src;
+    show(img);
     await sleep(4000);
-    hide(image);
+    hide(img);
   }
-
-  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
-
-  const total = parseInt(localStorage.getItem('scans_total')||'12',10);
-  const usedNow = parseInt(localStorage.getItem('scans_used')||'0',10);
-  stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${usedNow}<br>À toi de jouer sans aide : ${Math.max(0,total-usedNow)}`;
+  
+  hide($('text'));
+  showText("Chaque détail compte. Le roman commence ici.",'bottom');
+  await sleep(7000);
+  hide($('text'));
+  
+  const stats=$('stats');
+  stats.innerHTML=`Pièce : ${rep.join(', ')}<br>Suspect choisi : ${choix}`;
   show(stats);
-
-  show(restart);
+  
+  $('restart').style.display='block';
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+$('start').onclick=run;
+$('restart').onclick=()=>location.reload();
 </script>
 </body>
 </html>
