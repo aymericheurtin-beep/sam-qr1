@@ -13,8 +13,8 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #suspectsWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;display:none;z-index:20}
 #suspectsImg{display:block;max-width:95vmin;max-height:80vmin}
-.zone{position:absolute;width:18%;height:28%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid transparent;transition:.2s}
-.zone:hover{border-color:#fff;background:rgba(255,255,255,.12)}
+.zone{position:absolute;width:16%;height:24%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);transition:.2s}
+.zone:hover{border-color:#fff;background:rgba(255,255,255,.18)}
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0;image-rendering:auto}
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
@@ -50,13 +50,13 @@ const descriptions={
 const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
 const zones = [
-    {name:"Rémy",x:14.0,y:32.0},
-    {name:"Vidal",x:34.0,y:26.3},
+    {name:"Rémy",x:20.2,y:19.5},
+    {name:"Vidal",x:34.0,y:20.1},
     {name:"Noé",x:18.0,y:65.0},
-    {name:"Sam",x:50.0,y:70.0},
-    {name:"Inès",x:68.0,y:45.0},
-    {name:"Colin",x:85.0,y:45.0},
-    {name:"Chloé",x:70.0,y:70.0}
+    {name:"Sam",x:45.6,y:66.5},
+    {name:"Inès",x:64.5,y:50.0},
+    {name:"Colin",x:78.2,y:47.0},
+    {name:"Chloé",x:64.3,y:70.3}
 ];
 function askCharacterOnImage(){
   return new Promise(res=>{
