@@ -142,9 +142,6 @@ async function run(){
   const vidalImagined = localStorage.getItem('qr6_vidal_imagined') || '...';
   await showText(`Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`, 4500, 'center');
 
-  await askMulti("Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?",[
-    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
-  ]);
 
   await showImage('bureau_vidal.jpg');
   await showText('Voici un bureau',3000,'bottom');
@@ -164,7 +161,7 @@ async function run(){
     MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
   };
-  const DISPLAY_TIME = 15000;
+  const DISPLAY_TIME = 20000;
   let opened=0;
   const carnetOrder=[];
   await new Promise(res=>{
