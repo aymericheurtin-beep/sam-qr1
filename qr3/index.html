@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR2</title>
+<title>QR3</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
@@ -13,14 +13,13 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;display:none;opacity:0;transition:opacity 1s ease}
 #restart.show{opacity:1;display:block}
 p{font-size:22px;line-height:1.4;max-width:650px}
-#msg{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 20px;border-radius:6px;display:none;z-index:200;font-size:16px}
+#msg{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(255,0,0,.9);color:#fff;padding:10px 20px;border-radius:8px;display:none;z-index:200;font-size:16px}
 </style>
 <style>
 html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 p,#text,.screen p,#question,#msg{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important}
 #startBtn,#start,#btn,#restartBtn,#restart{font-size:clamp(20px,5vmin,26px)!important}
-small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!important}
 </style>
 </head>
 <body>
@@ -28,11 +27,11 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
 <div id="msg"></div>
 
 <div id="post" class="screen">
-  <p>Avec le bruit de la porte, du bouchon et du liquide, comprenez-vous différemment pourquoi il a besoin de courir ?</p>
+  <p>Votre texte QR3 ici</p>
 </div>
 <button id="restart">Recommencer</button>
 
-<audio id="audio" src="./qrcode2total.mp3" preload="auto" playsinline></audio>
+<audio id="audio" src="./docfinalqr3.mp4" preload="auto" playsinline></audio>
 
 <script>
 const btn=document.getElementById('btn');
@@ -41,16 +40,16 @@ const audio=document.getElementById('audio');
 const post=document.getElementById('post');
 const msg=document.getElementById('msg');
 
+function showMsg(t){
+  msg.textContent=t;
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',4000);
+}
+
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
 
-function showMsg(txt){
-  msg.textContent=txt;
-  msg.style.display='block';
-  setTimeout(()=>msg.style.display='none',3000);
-}
-
-btn.onclick=async()=>{
+btn.onclick=async ()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
   btn.style.display='none';
@@ -58,23 +57,17 @@ btn.onclick=async()=>{
   try{
     await audio.play();
   }catch(e){
-    console.error('Play error:', e.name, e.message);
-    showMsg('Son bloqué. Touchez à nouveau.');
-    // Permet un second tap pour débloquer
-    const retry=()=>{
-      audio.play().then(()=>{
-        document.removeEventListener('click',retry);
-      }).catch(()=>{});
-    };
-    document.addEventListener('click',retry,{once:true});
+    console.error('Play error',e);
+    showMsg('Son bloqué : touchez à nouveau');
+    btn.style.display='block';
   }
-}
+};
 
 audio.onended=()=>{
   post.classList.add('active');
   restart.style.display='block';
   setTimeout(()=>restart.classList.add('show'),50);
-}
+};
 
 restart.onclick=()=>location.reload();
 </script>
