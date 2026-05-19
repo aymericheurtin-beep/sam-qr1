@@ -1,26 +1,18 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>QR12</title>
-<style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>QR12</title><style>
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
 #start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:8%}
-#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#text.center{top:8%}#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #suspectsWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;display:none;z-index:20}
 #suspectsImg{display:block;max-width:95vmin;max-height:80vmin}
-.zone{position:absolute;width:16%;height:24%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);transition:.2s}
+.zone{position:absolute;width:18%;height:26%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);transition:.2s}
 .zone:hover{border-color:#fff;background:rgba(255,255,255,.18)}
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0;image-rendering:auto}
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
-</style>
-</head>
-<body>
+</style></head><body>
 <button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
 <div id="text"></div>
@@ -38,74 +30,18 @@ function showText(t,hold=3000,pos='center'){text.className='';text.classList.add
 function showTextStay(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);}
 async function play(a){try{await a.play()}catch{}}
 function stopAudio(a){try{a.pause();a.currentTime=0}catch{}}
-const descriptions={
-  'Rémy':"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
-  'Noé':"Regard sur ses chaussures. La posture des mauvais jours.",
-  'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
-  'Sam':"Assis au centre, de dos. Il regarde Inès.",
-  'Inès':"Debout avec carnet. Elle a demandé à être debout.",
-  'Colin':"Mains dans les poches, adossé au mur. Il regarde personne en particulier.",
-  'Chloé':"De dos, elle marche vers le bureau. Sa démarche quand elle est stressée."
-};
-const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+const descriptions={'Rémy':"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",'Noé':"Regard sur ses chaussures. La posture des mauvais jours.",'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",'Sam':"Assis au centre, de dos. Il regarde Inès.",'Inès':"Debout avec carnet. Elle a demandé à être debout.",'Colin':"Mains dans les poches, adossé au mur. Il regarde personne en particulier.",'Chloé':"De dos, elle marche vers le bureau. Sa démarche quand elle est stressée."};
+const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
 function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
-const zones = [
-    {name:"Rémy",x:20.2,y:19.5},
-    {name:"Vidal",x:34.0,y:20.1},
-    {name:"Noé",x:18.0,y:65.0},
-    {name:"Sam",x:45.6,y:66.5},
-    {name:"Inès",x:64.5,y:50.0},
-    {name:"Colin",x:78.2,y:47.0},
-    {name:"Chloé",x:64.3,y:70.3}
-];
-function askCharacterOnImage(){
-  return new Promise(res=>{
-    show(suspectsWrap);
-    suspectsWrap.querySelectorAll('.zone').forEach(z=>z.remove());
-    zones.forEach(z=>{
-      const d=document.createElement('div');
-      d.className='zone';
-      d.style.left=z.x+'%';
-      d.style.top=z.y+'%';
-      d.title=z.name;
-      d.onclick=()=>{suspectsWrap.querySelectorAll('.zone').forEach(zz=>zz.remove());hide(suspectsWrap);res(z.name);};
-      suspectsWrap.appendChild(d);
-    });
-  });
-}
-async function showInesCrop(){
-  const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);
-  if(!choice){await showText("Aucune Inès n'a été choisie dans QR4.",2500,'center');return;}
-  const imgOk = await new Promise(r=>{cropImg.onload=()=>r(true);cropImg.onerror=()=>r(false);if(cropImg.complete && cropImg.naturalWidth) r(true);});
-  if(!imgOk){await showText("Photo Inès introuvable.\nCopiez ines_5_choix.jpg dans le dossier QR12.",4000,'center');return;}
-  const col=(choice-1)%3, row=Math.floor((choice-1)/3);
-  cropImg.style.left=`-${col*100}%`;
-  cropImg.style.top=`-${row*100}%`;
-  show(cropWrap);
-  showTextStay("c'était ton Inès",'bottom');
-  await sleep(4000);
-  hide(text);hide(cropWrap);
-}
-async function run(){
-  hide(start);hide(restart);hide(stats);
-  const used=addUsed('qr12');
-  await play(narrateur);await sleep(8000);stopAudio(narrateur);
-  showTextStay('Appuyez sur le personnage qui vous intéresse le plus.','center');
-  const charChoice=await askCharacterOnImage();
-  hide(text);
-  if(charChoice==='Inès'){await showInesCrop();}
-  let txt=descriptions[charChoice]||'';
-  const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';
-  if(firstCarnet && normalize(firstCarnet)===normalize(charChoice)){
-    txt+="\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
-  }
-  await showText(txt,6000,'center');
-  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
-  stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
-  show(stats);show(restart);
-}
-start.onclick=run;
-restart.onclick=()=>location.reload();
-</script>
-</body>
-</html>
+const zones=[{name:"Rémy",x:19.7,y:23.5},{name:"Vidal",x:32.2,y:23.9},{name:"Noé",x:18.3,y:63.6},{name:"Sam",x:40.6,y:66.8},{name:"Inès",x:57.3,y:52.1},{name:"Colin",x:70.5,y:50.5},{name:"Chloé",x:57.4,y:72.0}];
+function askCharacterOnImage(){return new Promise(res=>{show(suspectsWrap);suspectsWrap.querySelectorAll('.zone').forEach(z=>z.remove());zones.forEach(z=>{const d=document.createElement('div');d.className='zone';d.style.left=z.x+'%';d.style.top=z.y+'%';d.title=z.name;d.onclick=()=>{suspectsWrap.querySelectorAll('.zone').forEach(zz=>zz.remove());hide(suspectsWrap);res(z.name);};suspectsWrap.appendChild(d);});});}
+async function showInesCrop(){const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);if(!choice){await showText("Aucune Inès n'a été choisie dans QR4.",2500,'center');return;}const imgOk=await new Promise(r=>{cropImg.onload=()=>r(true);cropImg.onerror=()=>r(false);if(cropImg.complete&&cropImg.naturalWidth)r(true);});if(!imgOk){await showText("Photo Inès introuvable.
+Copiez ines_5_choix.jpg dans le dossier QR12.",4000,'center');return;}const col=(choice-1)%3,row=Math.floor((choice-1)/3);cropImg.style.left=`-${col*100}%`;cropImg.style.top=`-${row*100}%`;show(cropWrap);showTextStay("c'était ton Inès",'bottom');await sleep(4000);hide(text);hide(cropWrap);}
+async function run(){hide(start);hide(restart);hide(stats);const used=addUsed('qr12');await play(narrateur);await sleep(8000);stopAudio(narrateur);showTextStay('Appuyez sur le personnage qui vous intéresse le plus.','center');const charChoice=await askCharacterOnImage();hide(text);if(charChoice==='Inès'){await showInesCrop();}let txt=descriptions[charChoice]||'';const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';if(firstCarnet&&normalize(firstCarnet)===normalize(charChoice)){txt+="
+
+Décidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";}await showText(txt,6000,'center');await showText("Dans quelques secondes vous allez lire la suite du roman.
+Chaque personnage dans cette pièce a une raison d'être là.
+Vous aussi vous savez des choses sur eux.
+Utilisez-les.",7000,'center');stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;show(stats);show(restart);}
+start.onclick=run;restart.onclick=()=>location.reload();
+</script></body></html>
