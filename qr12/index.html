@@ -13,7 +13,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #suspectsWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;display:none;z-index:20}
 #suspectsImg{display:block;max-width:95vmin;max-height:80vmin}
-.zone{position:absolute;width:14%;height:22%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid transparent;transition:.2s}
+.zone{position:absolute;width:18%;height:28%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid transparent;transition:.2s}
 .zone:hover{border-color:#fff;background:rgba(255,255,255,.12)}
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0;image-rendering:auto}
@@ -42,21 +42,21 @@ const descriptions={
   'Rémy':"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
   'Noé':"Regard sur ses chaussures. La posture des mauvais jours.",
   'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
-  'Sam':"Assis de dos. Il regarde Inès.",
-  'Inès':"Debout de dos avec carnet. Elle a demandé à être debout.",
-  'Dubois':"Tout à droite. Il observe sans intervenir.",
-  'Colin':"Mains dans les poches. Il regarde personne en particulier."
+  'Sam':"Assis au centre, de dos. Il regarde Inès.",
+  'Inès':"Debout avec carnet. Elle a demandé à être debout.",
+  'Colin':"Mains dans les poches, adossé au mur. Il regarde personne en particulier.",
+  'Chloé':"De dos, elle marche vers le bureau. Sa démarche quand elle est stressée."
 };
 const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
 const zones = [
-    {name:"Rémy",x:19.8,y:16.5},
-    {name:"Noé",x:20.5,y:32.1},
-    {name:"Vidal",x:33.0,y:16.5},
-    {name:"Dubois",x:45.5,y:18.25},
-    {name:"Inès",x:60.9,y:21.2},
-    {name:"Colin",x:77.0,y:23.1},
-    {name:"Sam",x:41.4,y:32.3}
+    {name:"Rémy",x:14.0,y:32.0},
+    {name:"Vidal",x:34.0,y:26.3},
+    {name:"Noé",x:18.0,y:65.0},
+    {name:"Sam",x:50.0,y:70.0},
+    {name:"Inès",x:68.0,y:45.0},
+    {name:"Colin",x:85.0,y:45.0},
+    {name:"Chloé",x:70.0,y:70.0}
 ];
 function askCharacterOnImage(){
   return new Promise(res=>{
