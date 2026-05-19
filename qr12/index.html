@@ -1,386 +1,362 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>QR12</title>
 <style>
-  :root{color-scheme:dark light}
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:#0b0d12;
-    color:#e8ecf1;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-  }
-  .wrap{
-    width:100%;
-    max-width:720px;
-    background:#121621;
-    border:1px solid #1f2636;
-    border-radius:16px;
-    padding:24px;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-  }
-  h1{
-    margin:0 0 16px;
-    font-size:22px;
-    font-weight:700;
-    letter-spacing:.2px;
-  }
-  #text{
-    font-size:18px;
-    line-height:1.5;
-    white-space:pre-wrap;
-    min-height:3lh;
-  }
-  #choices{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-top:16px;
-  }
-  .choice{
-    padding:12px 14px;
-    border-radius:12px;
-    border:1px solid #2a3448;
-    background:#161c29;
-    color:#e8ecf1;
-    cursor:pointer;
-    text-align:left;
-    font-size:16px;
-    transition:transform .05s ease,border-color .2s;
-  }
-  .choice:hover{border-color:#3a4763}
-  .choice:active{transform:scale(.99)}
-  .choice[aria-pressed="true"]{
-    border-color:#5b8cff;
-    background:#1a2440;
-  }
-  .row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  .btn{
-    padding:12px 16px;
-    border-radius:12px;
-    border:1px solid #2a3448;
-    background:#1a2030;
-    color:#e8ecf1;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:600;
-  }
-  .btn.primary{
-    background:#5b8cff;
-    border-color:#5b8cff;
-    color:#fff;
-  }
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  #img{
-    max-width:100%;
-    height:auto;
-    border-radius:12px;
-    border:1px solid #1f2636;
-    display:block;
-    margin:0 auto;
-  }
-  .muted{color:#9aa7bd;font-size:14px}
-  .stack{display:flex;flex-direction:column;gap:12px}
-  .stats{
-    background:#0f1320;
-    border:1px dashed #2a3448;
-    border-radius:12px;
-    padding:14px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-size:14px;
-    line-height:1.6;
-  }
-  .hidden{display:none !important}
+html,body{
+  margin:0;
+  height:100%;
+  background:#000;
+  color:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  overflow:hidden;
+}
+#start,#restart{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:5vmin;
+  padding:4vmin 8vmin;
+  background:#fff;
+  color:#000;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  z-index:100;
+}
+#restart{
+  display:none;
+}
+#text{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  text-align:center;
+  font-size:5vmin;
+  line-height:1.35;
+  z-index:30;
+  display:none;
+  white-space:pre-line;
+  text-shadow:0 0 6px #000;
+}
+#text.center{
+  top:8%;
+}
+#text.bottom{
+  bottom:6%;
+  font-size:3.8vmin;
+  background:rgba(0,0,0,.75);
+  padding:1.8vmin 2.5vmin;
+  border-radius:8px;
+  max-width:85%;
+}
+#text.top{
+  top:8%;
+}
+#choices{
+  position:absolute;
+  top:28%;
+  left:50%;
+  transform:translateX(-50%);
+  display:none;
+  flex-direction:column;
+  gap:2.2vmin;
+  width:88%;
+  z-index:30;
+}
+.btn{
+  font-size:4vmin;
+  padding:3vmin;
+  background:#111;
+  color:#fff;
+  border:1px solid #fff;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:center;
+}
+.btn.validate{
+  background:#fff;
+  color:#000;
+  margin-top:2vmin;
+}
+.choice{
+  display:flex;
+  align-items:center;
+  gap:2vmin;
+  background:#111;
+  border:1px solid #fff;
+  border-radius:8px;
+  padding:2.5vmin;
+  font-size:4vmin;
+  cursor:pointer;
+}
+.choice input{
+  width:4vmin;
+  height:4vmin;
+}
+#image{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  max-width:90vmin;
+  max-height:78vmin;
+  z-index:10;
+  display:none;
+}
+#stats{
+  position:absolute;
+  bottom:5vmin;
+  right:6vmin;
+  font-size:4vmin;
+  z-index:30;
+  display:none;
+  text-shadow:0 0 8px #000;
+  text-align:right;
+  line-height:1.4;
+  background:rgba(0,0,0,.6);
+  padding:1.5vmin 2vmin;
+  border-radius:8px;
+}
+/* Unification typo */
+#text,.btn,.choice{
+  font-size:clamp(14px,4vmin,28px);
+}
+#text.bottom,#stats{
+  font-size:clamp(13px,3.8vmin,24px);
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>QR12</h1>
-
-  <div class="stack">
-    <button id="start" class="btn primary">Démarrer</button>
-
-    <div id="text" class="hidden"></div>
-
-    <div id="choices" class="hidden"></div>
-
-    <img id="img" class="hidden" alt="Suspects" />
-
-    <button id="restart" class="btn hidden">Recommencer</button>
-
-    <div id="stats" class="stats hidden"></div>
-  </div>
-
-  <audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
-</div>
+<button id="start">Démarrer</button>
+<button id="restart">Recommencer</button>
+<div id="text"></div>
+<div id="choices"></div>
+<img id="image" alt="" />
+<div id="stats"></div>
+<audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
 
 <script>
-  const $ = s => document.querySelector(s);
-  const startBtn = $('#start');
-  const restartBtn = $('#restart');
-  const textEl = $('#text');
-  const choicesEl = $('#choices');
-  const imgEl = $('#img');
-  const statsEl = $('#stats');
-  const narrateur = $('#narrateur');
+const $ = id => document.getElementById(id);
+const show = el => el.style.display = 'block';
+const hide = el => el.style.display = 'none';
+const flex = el => el.style.display = 'flex';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+const textEl = $('text');
+const choicesEl = $('choices');
+const imageEl = $('image');
+const statsEl = $('stats');
+const startBtn = $('start');
+const restartBtn = $('restart');
+const narrateur = $('narrateur');
 
-  const show = el => el.classList.remove('hidden');
-  const hide = el => el.classList.add('hidden');
-  const flex = el => {el.classList.remove('hidden'); el.style.display='flex'};
-
-  function showText(html){
-    textEl.innerHTML = html;
-    show(textEl);
-  }
-
-  function clearChoices(){
-    choicesEl.innerHTML = '';
-    hide(choicesEl);
-  }
-
-  async function askSingle(question, options){
-    showText(question);
-    choicesEl.innerHTML = '';
-    flex(choicesEl);
-    return new Promise(resolve => {
-      options.forEach(opt => {
-        const b = document.createElement('button');
-        b.className = 'choice';
-        b.textContent = opt;
-        b.onclick = () => {
-          clearChoices();
-          resolve(opt);
-        };
-        choicesEl.appendChild(b);
-      });
-    });
-  }
-
-  async function askMulti(question, options){
-    showText(question);
-    choicesEl.innerHTML = '';
-    flex(choicesEl);
-    const selected = new Set();
-    options.forEach(opt => {
-      const b = document.createElement('button');
-      b.className = 'choice';
-      b.textContent = opt;
-      b.setAttribute('aria-pressed','false');
-      b.onclick = () => {
-        if(selected.has(opt)){
-          selected.delete(opt);
-          b.setAttribute('aria-pressed','false');
-        }else{
-          selected.add(opt);
-          b.setAttribute('aria-pressed','true');
-        }
-      };
-      choicesEl.appendChild(b);
-    });
-    const row = document.createElement('div');
-    row.className = 'row';
-    const valider = document.createElement('button');
-    valider.className = 'btn primary';
-    valider.textContent = 'Valider';
-    valider.onclick = () => {
-      clearChoices();
-      resolve(Array.from(selected));
-    };
-    row.appendChild(valider);
-    choicesEl.appendChild(row);
-    return new Promise(resolve => {
-      valider._resolve = resolve;
-    });
-  }
-
-  // Override askMulti resolve closure fix
-  async function askMultiFixed(question, options){
-    showText(question);
-    choicesEl.innerHTML = '';
-    flex(choicesEl);
-    const selected = new Set();
-    options.forEach(opt => {
-      const b = document.createElement('button');
-      b.className = 'choice';
-      b.textContent = opt;
-      b.setAttribute('aria-pressed','false');
-      b.onclick = () => {
-        if(selected.has(opt)){
-          selected.delete(opt);
-          b.setAttribute('aria-pressed','false');
-        }else{
-          selected.add(opt);
-          b.setAttribute('aria-pressed','true');
-        }
-      };
-      choicesEl.appendChild(b);
-    });
-    return new Promise(resolve => {
-      const row = document.createElement('div');
-      row.className = 'row';
-      const valider = document.createElement('button');
-      valider.className = 'btn primary';
-      valider.textContent = 'Valider';
-      valider.onclick = () => {
-        clearChoices();
-        resolve(Array.from(selected));
-      };
-      row.appendChild(valider);
-      choicesEl.appendChild(row);
-    });
-  }
-
-  async function play(audio){
-    try{
-      audio.currentTime = 0;
-      const p = audio.play();
-      if(p && typeof p.catch === 'function') p.catch(()=>{});
-    }catch{}
-  }
-
-  function waitAudioOrTimeout(audio, ms){
-    return new Promise(resolve => {
-      let done = false;
-      const finish = () => {
-        if(done) return;
-        done = true;
-        audio.removeEventListener('ended', onEnd);
-        resolve();
-      };
-      const onEnd = () => finish();
-      audio.addEventListener('ended', onEnd, {once:true});
-      setTimeout(finish, ms);
-    });
-  }
-
-  async function showImageTimeout(src, fallback, ms){
-    return new Promise(resolve => {
-      let settled = false;
-      const done = () => {
-        if(settled) return;
-        settled = true;
-        setTimeout(()=>{ hide(imgEl); resolve(); }, ms);
-      };
-      imgEl.onerror = () => {
-        if(fallback && imgEl.src.endsWith(src)){
-          imgEl.src = fallback;
-        }else{
-          done();
-        }
-      };
-      imgEl.onload = () => {
-        show(imgEl);
-        done();
-      };
-      imgEl.src = src;
-    });
-  }
-
-  function getScans(){
-    const used = parseInt(localStorage.getItem('scans_used') || '0',10);
-    const total = parseInt(localStorage.getItem('scans_total') || '12',10);
-    const solo = used <= 1 ? 'oui' : 'non';
-    return {used,total,solo};
-  }
-
-  function incScans(){
-    const used = parseInt(localStorage.getItem('scans_used') || '0',10)+1;
-    localStorage.setItem('scans_used', String(used));
-    if(!localStorage.getItem('scans_total')) localStorage.setItem('scans_total','12');
-  }
-
-  const descriptions = {
-    'Vidal':'Vidal : méthodique, observateur, parle peu mais note tout.',
-    'Noé':'Noé : impulsif, créatif, prend des risques.',
-    'Rémy':'Rémy : calme, logique, excellent en déduction.',
-    'Chloé':'Chloé : empathique, repère les détails humains.',
-    'Colin':'Colin : technique, à l’aise avec les appareils.',
-    'Sam':'Sam : rapide, efficace, va droit au but.',
-    'Inès':'Inès : prudente, mémoire visuelle impressionnante.'
-  };
-
-  startBtn.onclick = async () => {
-    hide(startBtn);
-    hide(restartBtn);
-    hide(statsEl);
-    hide(imgEl);
-    clearChoices();
-    incScans();
-
-    await play(narrateur);
-    await waitAudioOrTimeout(narrateur, 6000);
-
-    hide(textEl);
-    await showImageTimeout('touslessuspects.jpg','touslessuspects.png',5000);
-
-    const pieceOptions = ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
-    const pieces = await askMultiFixed('Comment décririez-vous la pièce ?', pieceOptions);
-    localStorage.setItem('qr12_piece', JSON.stringify(pieces));
-
-    const bureau = localStorage.getItem('qr11_bureau') || 'inconnu';
-    const pieceTxt = pieces.length ? pieces.join(', ') : 'sans précision';
-    showText(`Pont : Votre bureau précédent était <b>${bureau}</b>.<br>La pièce actuelle semble <b>${pieceTxt}</b>.`);
-
-    await sleep(2000);
-
-    const characters = ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès'];
-    const choisi = await askSingle('Qui choisissez-vous ?', characters);
-
-    let desc = descriptions[choisi] || `${choisi} : profil non renseigné.`;
-    const extras = [];
-
-    const firstCarnet = localStorage.getItem('qr11_first_carnet');
-    if(firstCarnet && firstCarnet === choisi){
-      extras.push('→ Correspondance avec le premier carnet de QR11.');
-    }
-    if(localStorage.getItem('qr9_vestiaire') && localStorage.getItem('qr8_first')){
-      extras.push('→ Indices vestiaire QR9 et premier élément QR8 confirmés.');
-    }
-
-    showText(`<b>${choisi}</b><br>${desc}${extras.length ? '<br><br>' + extras.join('<br>') : ''}`);
-
-    await sleep(7000);
-
-    showText('Instruction finale : conservez votre choix et avancez vers le point suivant sans partager d’informations. Restez attentif aux détails.');
-
-    await sleep(7000);
-
-    const {used,total,solo} = getScans();
-    statsEl.innerHTML = `scans_total: ${total}<br>scans_used: ${used}<br>solo: ${solo}`;
-    show(statsEl);
-    show(restartBtn);
-  };
-
-  restartBtn.onclick = () => {
-    hide(restartBtn);
-    hide(statsEl);
-    hide(imgEl);
-    clearChoices();
-    textEl.innerHTML = '';
-    hide(textEl);
-    show(startBtn);
-  };
-
-  // init
+function setTextClass(pos){
+  textEl.className = '';
+  textEl.classList.add(pos || 'center');
+}
+async function showText(t, hold = 2500, pos = 'center'){
+  setTextClass(pos);
+  textEl.textContent = t;
+  show(textEl);
+  await sleep(hold);
   hide(textEl);
-  hide(choicesEl);
-  hide(imgEl);
+}
+function showTextStay(t, pos = 'center'){
+  setTextClass(pos);
+  textEl.textContent = t;
+  show(textEl);
+}
+function hideText(){ hide(textEl); }
+
+function normalize(s){
+  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+
+function askMulti(q, opts){
+  return new Promise(resolve=>{
+    showTextStay(q,'top');
+    choicesEl.innerHTML = '';
+    opts.forEach(opt=>{
+      const label = document.createElement('label');
+      label.className = 'choice';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = opt;
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(opt));
+      choicesEl.appendChild(label);
+    });
+    const btn = document.createElement('button');
+    btn.className = 'btn validate';
+    btn.textContent = 'Valider';
+    btn.onclick = ()=>{
+      const selected = Array.from(choicesEl.querySelectorAll('input:checked')).map(i=>i.value);
+      hide(choicesEl);
+      hideText();
+      choicesEl.innerHTML = '';
+      resolve(selected);
+    };
+    choicesEl.appendChild(btn);
+    flex(choicesEl);
+  });
+}
+
+function askSingle(q, opts){
+  return new Promise(resolve=>{
+    // q already shown via showTextStay before call
+    choicesEl.innerHTML = '';
+    opts.forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = opt;
+      btn.onclick = ()=>{
+        hide(choicesEl);
+        hideText();
+        choicesEl.innerHTML = '';
+        resolve(opt);
+      };
+      choicesEl.appendChild(btn);
+    });
+    flex(choicesEl);
+  });
+}
+
+function playAudioWithTimeout(audio, timeout=6000){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = ()=>{
+      if(done) return;
+      done = true;
+      resolve();
+    };
+    audio.onended = finish;
+    audio.play().catch(()=>{});
+    setTimeout(finish, timeout);
+  });
+}
+
+const descriptions = {
+  'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
+  'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
+  'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
+  'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
+  'Colin': "Mains dans les poches. Il regarde personne en particulier.",
+  'Sam': "Assis au centre. Il regarde Inès.",
+  'Inès': "Debout. Elle a demandé à être debout."
+};
+
+async function showImageSrc(src, duration){
+  return new Promise(resolve=>{
+    imageEl.onload = ()=>{ show(imageEl); };
+    imageEl.onerror = ()=>{ hide(imageEl); resolve(); };
+    imageEl.src = src;
+    show(imageEl);
+    setTimeout(()=>{
+      hide(imageEl);
+      resolve();
+    }, duration);
+  });
+}
+
+async function showImageWithFallback(base, duration){
+  return new Promise(resolve=>{
+    let triedPng = false;
+    imageEl.onerror = ()=>{
+      if(!triedPng){
+        triedPng = true;
+        imageEl.src = base.replace(/\.jpg$/i,'.png');
+      }else{
+        hide(imageEl);
+        resolve();
+      }
+    };
+    imageEl.onload = ()=>{ show(imageEl); };
+    imageEl.src = base;
+    setTimeout(()=>{
+      hide(imageEl);
+      resolve();
+    }, duration);
+  });
+}
+
+async function run(){
+  if(localStorage.getItem('qr12_done') === '1'){
+    hide(startBtn);
+    await showText("Vous avez déjà terminé cette étape.", 2500, 'center');
+    show(restartBtn);
+    return;
+  }
+  hide(startBtn);
   hide(restartBtn);
-  hide(statsEl);
+
+  // inc scans_used
+  const used = (parseInt(localStorage.getItem('scans_used') || '0',10) || 0) + 1;
+  localStorage.setItem('scans_used', used);
+
+  await playAudioWithTimeout(narrateur, 6000);
+  await sleep(3000);
+
+  const multi = await askMulti("Avant d’entrer — vous imaginez cette pièce comment ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+
+  // Compare with qr11_bureau
+  let bureauArr = [];
+  try{
+    bureauArr = JSON.parse(localStorage.getItem('qr11_bureau') || '[]');
+  }catch(e){}
+  const map = {
+    'petite':'petit',
+    'grande':'grand',
+    'lumineuse':'lumineux',
+    'sombre':'sombre',
+    'ordonnee':'ordonne',
+    'en bazar':'en bazar'
+  };
+  const normMulti = multi.map(m=> normalize(m)).map(m=> map[m] || m);
+  const normBureau = bureauArr.map(b=> normalize(b));
+  const setA = new Set(normMulti);
+  const setB = new Set(normBureau);
+  const same = setA.size === setB.size && [...setA].every(v=> setB.has(v));
+  await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.", 2500, 'center');
+
+  await showImageWithFallback('touslessuspects.jpg', 5000);
+  hide(imageEl);
+
+  showTextStay("Appuyez sur le personnage qui vous intéresse le plus.", 'top');
+  const choice = await askSingle(null, ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+
+  let txt = descriptions[choice] || '';
+  const firstCarnet = normalize(localStorage.getItem('qr11_first_carnet') || '');
+  if(firstCarnet && firstCarnet === normalize(choice)){
+    txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+  }
+  await showText(txt, 6000, 'center');
+
+  if(choice === 'Inès'){
+    const inesSrc = localStorage.getItem('qr4_ines');
+    if(inesSrc){
+      await showImageSrc(inesSrc, 4000);
+    }
+  }
+
+  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.", 7000, 'center');
+
+  const total = parseInt(localStorage.getItem('scans_total') || '12',10);
+  const usedNow = parseInt(localStorage.getItem('scans_used') || '1',10);
+  const left = Math.max(0, total - usedNow);
+  statsEl.textContent = `Scans proposés : ${total}\nScans utilisés : ${usedNow}\nÀ toi de jouer sans aide : ${left}`;
+  show(statsEl);
+
+  localStorage.setItem('qr12_done','1');
+  show(restartBtn);
+}
+
+startBtn.onclick = run;
+restartBtn.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
