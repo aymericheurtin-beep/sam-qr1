@@ -1,155 +1,153 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR9 - Sam</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>QR9</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
 #start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
-</style>
-<style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
+<button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
-
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
-
-<audio id="aLavelot" src="audio_vidal.mp3" preload="auto"></audio>
-<audio id="aCadenas" src="cadenas_troisfois.mp3" preload="auto"></audio>
-<audio id="aNarrateur" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="narrateur" src="narrateur_qr9.mp3" preload="auto" playsinline></audio>
 
 <script>
+/* unification typo block */
 const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image');
-const aLavelot = $('aLavelot'), aCadenas = $('aCadenas'), aNarrateur = $('aNarrateur');
+const start = $('start');
+const restart = $('restart');
+const textEl = $('text');
+const choicesEl = $('choices');
+const imageEl = $('image');
+const narrateur = $('narrateur');
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
+const show = el => { el.style.display = 'block'; };
+const hide = el => { el.style.display = 'none'; };
+const flex = el => { el.style.display = 'flex'; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function showText(t, hold=3000, pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-  return sleep(hold).then(()=>hide(text));
+function showTextStay(txt, pos='center'){
+  textEl.textContent = txt;
+  textEl.className = pos;
+  show(textEl);
+}
+async function showText(txt, dur=3000, pos='center'){
+  showTextStay(txt, pos);
+  await sleep(dur);
+  hide(textEl);
+}
+function showImage(src){
+  if(src) imageEl.src = src;
+  show(imageEl);
+}
+function hideImage(){
+  hide(imageEl);
+}
+async function play(a){
+  try { await a.play(); } catch(e){}
+}
+function stopAudio(a){
+  try { a.pause(); a.currentTime = 0; } catch(e){}
 }
 
-function askSingle(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{ hide(text); hide(choices); res(o); };
-      choices.appendChild(b);
+async function askSingle(question, options){
+  return new Promise(resolve => {
+    showTextStay(question, 'bottom');
+    choicesEl.innerHTML = '';
+    flex(choicesEl);
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = opt;
+      b.onclick = () => {
+        [...choicesEl.children].forEach(c => c.classList.remove('sel'));
+        b.classList.add('sel');
+        setTimeout(()=>{
+          hide(choicesEl);
+          hide(textEl);
+          choicesEl.innerHTML = '';
+          resolve(opt);
+        },120);
+      };
+      choicesEl.appendChild(b);
     });
-    flex(choices);
   });
 }
 
-async function play(a){ try{ await a.play(); }catch{} }
+async function askMulti(question, options){
+  return new Promise(resolve => {
+    showTextStay(question, 'bottom');
+    choicesEl.innerHTML = '';
+    flex(choicesEl);
+    const selected = new Set();
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = opt;
+      b.onclick = () => {
+        if(selected.has(opt)){
+          selected.delete(opt);
+          b.classList.remove('sel');
+        }else{
+          selected.add(opt);
+          b.classList.add('sel');
+        }
+      };
+      choicesEl.appendChild(b);
+    });
+    const ok = document.createElement('button');
+    ok.className = 'btn';
+    ok.textContent = 'Valider';
+    ok.style.marginTop = '1vmin';
+    ok.onclick = () => {
+      hide(choicesEl);
+      hide(textEl);
+      choicesEl.innerHTML = '';
+      resolve([...selected]);
+    };
+    choicesEl.appendChild(ok);
+  });
+}
 
 async function run(){
-  hide(start); hide(restart);
+  hide(start);
+  hide(restart);
+  await play(narrateur);
+  await sleep(6000);
+  stopAudio(narrateur);
 
-  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
-  localStorage.setItem('scans_used', used);
-  localStorage.setItem('qr9_done','1');
-
-  // 1. Audio Lavelot
-  await play(aLavelot);
-  await sleep(8000);
-  aLavelot.pause(); aLavelot.currentTime=0;
-
-  // 2. Texte + Q1 vestiaire
-  await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
-  
-  const repVestiaire = await askSingle('Comment imaginez-vous ce vestiaire ?', [
-    'Vestiaire propre et ordonné',
-    'Désordonné et sale',
-    'Petit étroit aux casiers serrés',
-    'Vaste et vide qui résonne',
-    'Rien de précis'
-  ]);
-  localStorage.setItem('qr9_vestiaire', repVestiaire);
-
-  // 3. Image vestiaire sans bruit
-  image.src='vestiaire.jpg'; show(image);
-  text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
-  await sleep(4000);
-  hide(image); hide(text);
-
-  // 4. Bruit cadenas puis main
-  await play(aCadenas);
-  await sleep(3000);
-  aCadenas.pause(); aCadenas.currentTime=0;
-  image.src='mains.webp'; show(image);
-  await sleep(2500);
-  hide(image);
-
-  // 5. Question cadenas avec rappel QR1
-  const qr1 = localStorage.getItem('qr1_cadenas');
-  
-  const repCadenas = await askSingle('Le cadenas, vous l’aviez imaginé comment ?', [
-    'Un cadenas à chiffres',
-    'Un cadenas à clé',
-    'Un autre type de cadenas'
-  ]);
-  localStorage.setItem('qr9_cadenas', repCadenas);
-
-  if(qr1){
-    if(qr1 === repCadenas){
-      await showText('Bien joué, vous vous en êtes souvenus...',3500,'center');
-    }else{
-      await showText(`Étonnant.
-La dernière fois vous aviez imaginé ${qr1}`,4000,'center');
-    }
+  // Pont QR1
+  const cadenas = localStorage.getItem('qr1_cadenas') || '';
+  if (cadenas === 'Un cadenas à chiffres') {
+    await showText("Tiens... Vous aviez imaginé un cadenas à chiffres au QR1.\nOn y revient.", 4000, 'center');
   }
 
-  // 6. Fin audio narrateur
-  await play(aNarrateur);
-  await sleep(8000);
-  aNarrateur.pause(); aNarrateur.currentTime=0;
+  // Suite du QR9 (placeholder)
+  await showText("QR9 - La suite de l'enquête commence.", 3000, 'center');
 
-  // 7. Consigne finale
-  await showText('Gardez cette image en tête, elle va vous être utile pour comprendre la suite...',4000,'center');
+  // Example choice
+  const rep = await askSingle("Que faites-vous ?", ['Observer','Intervenir','Attendre']);
+  await showText(`Vous avez choisi : ${rep}`, 3000, 'center');
 
   show(restart);
 }
 
 start.onclick = run;
-restart.onclick = ()=> location.reload();
+restart.onclick = () => location.reload();
 </script>
 </body>
 </html>
