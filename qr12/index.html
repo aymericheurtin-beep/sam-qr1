@@ -2,509 +2,113 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>QR12</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root {
-    --bg: #0a0a0a;
-    --fg: #e5e5e5;
-    --accent: #ffffff;
-    --muted: #2a2a2a;
-  }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  }
-  
-  #app {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at center, #111 0%, #000 100%);
-  }
-  
-  #image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  #image.show {
-    opacity: 1;
-  }
-  
-  #text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    width: 100%;
-    padding: 0 24px;
-    text-align: center;
-    font-size: clamp(18px, 4.5vw, 28px);
-    line-height: 1.6;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-    opacity: 0;
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    z-index: 5;
-    white-space: pre-line;
-  }
-  
-  #text.show {
-    opacity: 1;
-  }
-  
-  #text.top {
-    top: 10%;
-    transform: translate(-50%, 0);
-  }
-  
-  #text.bottom {
-    top: auto;
-    bottom: 10%;
-    transform: translate(-50%, 0);
-  }
-  
-  #choices {
-    position: absolute;
-    bottom: 8%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 500px;
-    max-height: 45vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    z-index: 10;
-    padding: 8px;
-  }
-  
-  #choices.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  
-  #choices::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  #choices::-webkit-scrollbar-track {
-    background: var(--muted);
-    border-radius: 2px;
-  }
-  
-  #choices::-webkit-scrollbar-thumb {
-    background: var(--fg);
-    border-radius: 2px;
-  }
-  
-  .choice-btn {
-    position: relative;
-    width: 100%;
-    padding: 16px 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: var(--fg);
-    font-size: clamp(16px, 3.5vw, 20px);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(10px);
-    text-align: center;
-  }
-  
-  .choice-btn:active {
-    transform: scale(0.97);
-  }
-  
-  .choice-btn.selected {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-  }
-  
-  .choice-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  #validate {
-    position: absolute;
-    bottom: 3%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 40px;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 12px;
-    font-size: clamp(16px, 3.5vw, 18px);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    z-index: 11;
-  }
-  
-  #validate.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  
-  #validate:active {
-    transform: translateX(-50%) scale(0.95);
-  }
-  
-  #validate:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-  
-  #start {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px 48px;
-    background: transparent;
-    border: 2px solid var(--fg);
-    border-radius: 16px;
-    color: var(--fg);
-    font-size: clamp(18px, 4vw, 22px);
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    z-index: 20;
-  }
-  
-  #start:hover {
-    background: var(--fg);
-    color: var(--bg);
-  }
-  
-  #start:active {
-    transform: translate(-50%, -50%) scale(0.95);
-  }
-  
-  #start.hide {
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  #stats {
-    position: absolute;
-    bottom: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: clamp(14px, 3vw, 18px);
-    font-weight: 300;
-    letter-spacing: 0.05em;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.6s ease;
-    z-index: 6;
-    line-height: 1.8;
-  }
-  
-  #stats.show {
-    opacity: 1;
-  }
-  
-  #restart {
-    position: absolute;
-    bottom: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 32px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    color: var(--fg);
-    font-size: clamp(14px, 3vw, 16px);
-    font-weight: 300;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    z-index: 10;
-  }
-  
-  #restart.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  
-  #restart:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  .fade {
-    animation: fadeIn 0.6s ease;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @media (max-height: 600px) {
-    #choices {
-      max-height: 35vh;
-      bottom: 12%;
-    }
-    #validate {
-      bottom: 4%;
-    }
-  }
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
+#image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn.used{opacity:.4}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="app">
-  <img id="image" alt="">
-  <div id="text"></div>
-  <div id="choices"></div>
-  <button id="validate">Valider</button>
-  <div id="stats"></div>
-  <button id="restart">Recommencer</button>
-  <button id="start">Touchez pour commencer</button>
-  <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-</div>
+<button id="start">Touchez pour commencer</button>
+<button id="restart">Recommencer</button>
+<div id="text"></div>
+<div id="choices"></div>
+<img id="image" alt="">
+<div id="carnetBox"></div>
+<div id="carnetLine"></div>
+<div id="hint"></div>
+<div id="stats" style="position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px"></div>
+<audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
 
 <script>
-(() => {
-  const $ = sel => document.querySelector(sel);
-  const image = $('#image');
-  const text = $('#text');
-  const choices = $('#choices');
-  const validate = $('#validate');
-  const stats = $('#stats');
-  const restart = $('#restart');
-  const start = $('#start');
-  const narrateur = $('#narrateur');
-  
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  
-  const show = el => el.classList.add('show');
-  const hide = el => el.classList.remove('show');
-  
-  const showText = async (content, duration = 3000, position = 'center') => {
-    text.textContent = content;
-    text.className = '';
-    if (position === 'top') text.classList.add('top');
-    if (position === 'bottom') text.classList.add('bottom');
-    show(text);
-    await sleep(duration);
-    hide(text);
-    await sleep(600);
-  };
-  
-  const showTextStay = (content, position = 'center') => {
-    text.textContent = content;
-    text.className = '';
-    if (position === 'top') text.classList.add('top');
-    if (position === 'bottom') text.classList.add('bottom');
-    show(text);
-  };
-  
-  const hideText = () => {
-    hide(text);
-  };
-  
-  const showImage = (src) => {
-    return new Promise(resolve => {
-      image.onload = () => {
-        show(image);
-        resolve();
-      };
-      image.onerror = () => {
-        const pngSrc = src.replace('.jpg', '.png');
-        if (src !== pngSrc) {
-          image.src = pngSrc;
-        } else {
-          resolve();
-        }
-      };
-      image.src = src;
-    });
-  };
-  
-  const hideImage = () => {
-    hide(image);
-  };
-  
-  const askSingle = (prompt, options) => {
-    return new Promise(resolve => {
-      if (prompt) showTextStay(prompt);
-      choices.innerHTML = '';
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn';
-        btn.textContent = opt;
-        btn.onclick = () => {
-          hide(choices);
-          hide(validate);
-          hideText();
-          resolve(opt);
-        };
-        choices.appendChild(btn);
-      });
-      show(choices);
-    });
-  };
-  
-  const askMulti = (prompt, options) => {
-    return new Promise(resolve => {
-      if (prompt) showTextStay(prompt, 'top');
-      choices.innerHTML = '';
-      const selected = new Set();
-      
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn';
-        btn.textContent = opt;
-        btn.onclick = () => {
-          if (selected.has(opt)) {
-            selected.delete(opt);
-            btn.classList.remove('selected');
-          } else {
-            selected.add(opt);
-            btn.classList.add('selected');
-          }
-          validate.disabled = selected.size === 0;
-        };
-        choices.appendChild(btn);
-      });
-      
-      validate.disabled = true;
-      validate.onclick = () => {
-        hide(choices);
-        hide(validate);
-        hideText();
-        resolve(Array.from(selected));
-      };
-      
-      show(choices);
-      show(validate);
-    });
-  };
-  
-  const normalize = str => {
-    if (!str) return '';
-    return str.toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, '');
-  };
-  
-  const compareArrays = (a, b) => {
-    const na = a.map(normalize).sort();
-    const nb = b.map(normalize).sort();
-    if (na.length !== nb.length) return false;
-    return na.every((v, i) => v === nb[i]);
-  };
-  
-  const run = async () => {
-    start.classList.add('hide');
-    
-    try {
-      await narrateur.play();
-    } catch(e) {
-      console.log('Audio autoplay blocked');
-    }
-    
-    await sleep(8000);
-    
-    const bureauChoice = await askMulti("Comment imaginez-vous cette pièce ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-    
-    const qr11Bureau = JSON.parse(localStorage.getItem('qr11_bureau') || '[]');
-    const pontText = compareArrays(bureauChoice, qr11Bureau) 
-      ? "Votre description correspond à ce que M. Vidal imaginait."
-      : "Votre vision diffère de ce que M. Vidal avait en tête.";
-    
-    await showText(pontText, 2500);
-    
-    await showImage('touslessuspects.jpg');
-    await sleep(5000);
-    hideImage();
-    
-    showTextStay("Appuyez sur le personnage qui vous intéresse le plus.", 'center');
-    const charChoice = await askSingle("", ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
-    
-    const descriptions = {
-      'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
-      'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
-      'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
-      'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
-      'Colin': "Mains dans les poches. Il regarde personne en particulier.",
-      'Sam': "Assis au centre. Il regarde Inès.",
-      'Inès': "Debout. Elle a demandé à être debout."
-    };
-    
-    let txt = descriptions[charChoice];
-    
-    const firstCarnet = localStorage.getItem('qr11_first_carnet');
-    if (normalize(firstCarnet) === normalize(charChoice)) {
-      txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
-    }
-    
-    await showText(txt, 6000, 'center');
-    
-    if (charChoice === 'Inès' && localStorage.getItem('qr4_ines')) {
-      await showImage(localStorage.getItem('qr4_ines'));
-      await sleep(4000);
-      hideImage();
-    }
-    
-    await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.", 7000, 'center');
-    
-    const total = parseInt(localStorage.getItem('scans_total') || '12', 10);
-    const used = parseInt(localStorage.getItem('scans_used') || '0', 10) + 1;
-    localStorage.setItem('scans_used', used);
-    
-    stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}`;
-    show(stats);
-    show(restart);
-  };
-  
-  start.onclick = run;
-  restart.onclick = () => location.reload();
-  
-})();
+const $ = id => document.getElementById(id);
+const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), carnetBox=$('carnetBox'), carnetLine=$('carnetLine'), hint=$('hint'), stats=$('stats'), narrateur=$('narrateur');
+const show=el=>el.style.display='block'; const hide=el=>el.style.display='none'; const flex=el=>el.style.display='flex'; const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function showText(t,hold=3000,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); return sleep(hold).then(()=>hide(text)); }
+function showTextStay(t,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); }
+function showImage(src){ return new Promise(res=>{ image.onload=()=>{show(image); image.style.opacity='1'; res();}; image.onerror=()=>{ console.warn('Image manquante:',src); show(image); res();}; image.classList.remove('zoomed'); image.style.opacity='0'; setTimeout(()=>{image.src=src;},50); }); }
+function hideImage(){ return new Promise(async res=>{ image.style.opacity='0'; await sleep(1200); hide(image); hide(hint); image.src=''; image.classList.remove('zoomed'); res(); }); }
+async function play(a){ try{ await a.play(); }catch{} }
+function stopAudio(a){ try{ a.pause(); a.currentTime=0; }catch{} }
+function askMulti(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; const sel=new Set(); opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); }; choices.appendChild(b); }); const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Valider'; ok.style.marginTop='1vmin'; ok.style.background='#fff'; ok.style.color='#000'; ok.onclick=()=>{ hide(text); hide(choices); res([...sel]); }; choices.appendChild(ok); flex(choices); choices.scrollTop=0; }); }
+function askSingle(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ hide(text); hide(choices); res(o); }; choices.appendChild(b); }); flex(choices); choices.scrollTop=0; }); }
+
+const descriptions = {
+ 'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
+ 'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
+ 'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
+ 'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
+ 'Colin': "Mains dans les poches. Il regarde personne en particulier.",
+ 'Sam': "Assis au centre. Il regarde Inès.",
+ 'Inès': "Debout. Elle a demandé à être debout."
+};
+
+function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+
+async function run(){
+ hide(start); hide(restart); hide(stats);
+ // inc scans
+ const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
+ localStorage.setItem('scans_used', used);
+
+ await play(narrateur);
+ await sleep(8000);
+ stopAudio(narrateur);
+
+ const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+
+ let bureau = [];
+ try{ bureau = JSON.parse(localStorage.getItem('qr11_bureau')||'[]'); }catch{}
+ const map = { petite:'petit', grande:'grand', lumineuse:'lumineux', sombre:'sombre', ordonnee:'ordonne', 'en bazar':'en bazar' };
+ const norm = arr => arr.map(v=> map[normalize(v)] || normalize(v)).sort().join('|');
+ const same = norm(repPiece) === norm(bureau) && bureau.length>0;
+ await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.",2500,'center');
+
+ await showImage('touslessuspects.jpg');
+ await sleep(5000);
+ await hideImage();
+
+ const charChoice = await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+
+ let txt = descriptions[charChoice] || '';
+ const firstCarnet = localStorage.getItem('qr11_first_carnet')||'';
+ if(normalize(firstCarnet) === normalize(charChoice)){
+   txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+ }
+ await showText(txt,6000,'center');
+
+ if(charChoice === 'Inès' && localStorage.getItem('qr4_ines')){
+   await showImage(localStorage.getItem('qr4_ines'));
+   await sleep(4000);
+   await hideImage();
+ }
+
+ await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
+
+ const total = parseInt(localStorage.getItem('scans_total')||'12',10);
+ stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}`;
+ show(stats);
+ show(restart);
+}
+
+start.onclick = run;
+restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
