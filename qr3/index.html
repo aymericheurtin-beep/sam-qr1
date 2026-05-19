@@ -7,62 +7,28 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:10}
-.screen.active{display:flex}
 #btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:100}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:20;display:none;opacity:0;transition:opacity 1s ease}
-#restart.show{opacity:1;display:block}
-p{font-size:22px;line-height:1.4;max-width:650px}
-#video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000;z-index:5}
-</style>
-<style>
-html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-p,#text,.screen p,#question,#msg{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important}
-#startBtn,#start,#btn,#restartBtn,#restart{font-size:clamp(20px,5vmin,26px)!important}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:none}
+#video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#000;display:none}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
-
 <video id="video" src="./docfinalqr3.mp4" playsinline preload="auto"></video>
-
-<div id="post" class="screen">
-  <p>Votre texte QR3 ici</p>
-</div>
 <button id="restart">Recommencer</button>
-
 <script>
 const btn=document.getElementById('btn');
 const restart=document.getElementById('restart');
 const video=document.getElementById('video');
-const post=document.getElementById('post');
-
-let t=parseInt(localStorage.getItem('scans_total')||0)+1;
-localStorage.setItem('scans_total',t);
-
 btn.onclick=async()=>{
-  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',u);
   btn.style.display='none';
   video.style.display='block';
-  try{
-    await video.play();
-  }catch(e){
-    console.error(e);
-    alert('Activez le son / touchez à nouveau');
-    btn.style.display='block';
-    video.style.display='none';
-  }
+  try{await video.play();}catch(e){btn.style.display='block';video.style.display='none';}
 };
-
 video.onended=()=>{
   video.style.display='none';
-  post.classList.add('active');
   restart.style.display='block';
-  setTimeout(()=>restart.classList.add('show'),50);
 };
-
 restart.onclick=()=>location.reload();
 </script>
 </body>
