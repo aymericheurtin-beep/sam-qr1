@@ -183,7 +183,6 @@ async function run(){
         setTimeout(()=>hide(carnetLine), DISPLAY_TIME);
         opened++;
         if(opened===3){
-          // Transition plus rapide après le dernier commentaire
           setTimeout(async ()=>{
             hide(carnetBox);await hideImage();hide(carnetLine);res();
           }, DISPLAY_TIME);
@@ -197,7 +196,8 @@ async function run(){
   await sleep(5000);
   await hideImage();
 
-  await askSingle("Vous l'aviez imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
+  const vidalMatch = await askSingle("Vous l'aviez imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
+  try{ localStorage.setItem('qr11_vidal_match', vidalMatch); }catch(e){}
 
   await showImage('vidal_jeune.webp');
   await sleep(5000);
@@ -223,4 +223,4 @@ async function run(){
 }
 </script>
 </body>
-</htm
+</html>
