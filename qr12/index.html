@@ -18,7 +18,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0}
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,4vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
-#log{position:absolute;top:10px;left:10px;font-size:14px;white-space:pre-wrap;z-index:200;color:#0f0;max-width:45%}
 </style>
 </head>
 <body>
@@ -29,13 +28,9 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <img id="image" alt="">
 <div id="inesCropWrap"><img id="inesCropImg" src="ines_5_choix.jpg" alt=""></div>
 <div id="stats"></div>
-<div id="log"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
 
 <script>
-function log(m){ const el=document.getElementById('log'); el.textContent+=m+"\n"; }
-window.onerror=(msg)=>{ log('ERREUR: '+msg); };
-
 const $=id=>document.getElementById(id);
 const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), stats=$('stats'), narrateur=$('narrateur');
 const cropWrap=$('inesCropWrap'), cropImg=$('inesCropImg');
@@ -50,15 +45,15 @@ function hideText(){ hide(text); }
 
 function showImage(src){
   return new Promise(res=>{
-    image.onload=()=>{ show(image); requestAnimationFrame(()=>image.style.opacity='1'); log('Image OK: '+src); res(); };
-    image.onerror=()=>{ log('Image manquante: '+src); show(image); image.style.opacity='1'; res(); };
+    image.onload=()=>{ show(image); requestAnimationFrame(()=>image.style.opacity='1'); res(); };
+    image.onerror=()=>{ show(image); image.style.opacity='1'; res(); };
     image.style.opacity='0';
     image.src=src;
   });
 }
 function hideImage(){ image.style.opacity='0'; setTimeout(()=>{ hide(image); image.src=''; },400); }
 
-async function play(a){ try{ await a.play(); log('Audio play'); }catch(e){ log('Audio bloqué'); } }
+async function play(a){ try{ await a.play(); }catch{} }
 
 function askSingle(q,opts){
   return new Promise(res=>{
@@ -98,7 +93,7 @@ const descriptions={
  'Sam':"Assis au centre. Il regarde Inès.",
  'Inès':"Debout. Elle a demandé à être debout."
 };
-function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 function addUsed(id){ const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]')); set.add(id); localStorage.setItem('qr_used_set',JSON.stringify([...set])); return set.size; }
 
 async function showInesZoom(){
@@ -117,64 +112,58 @@ async function showInesZoom(){
 }
 
 async function run(){
-  try{
-    log('run() appelé');
-    hide(start); hide(restart); hide(stats);
-    const used=addUsed('qr12');
-    log('Scans utilisés: '+used);
+  hide(start); hide(restart); hide(stats);
+  const used=addUsed('qr12');
 
-    await play(narrateur);
-    await sleep(8000);
-    try{ narrateur.pause(); narrateur.currentTime=0; }catch{}
+  await play(narrateur);
+  await sleep(8000);
+  try{ narrateur.pause(); narrateur.currentTime=0; }catch{}
 
-    const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-    log('Pièce: '+repPiece.join(', '));
+  await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
 
-    await showImage('touslessuspects.jpg');
-    await sleep(5000);
-    hideImage();
+  await showImage('touslessuspects.jpg');
+  await sleep(8000);
+  hideImage();
 
-    const charChoice=await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
-    log('Choix: '+charChoice);
+  const charChoice=await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
 
-    if(charChoice==='Inès'){ await showInesZoom(); }
+  if(charChoice==='Inès'){ await showInesZoom(); }
 
-    if(charChoice==='Vidal'){
-      const vidalMatch = localStorage.getItem('qr11_vidal_match') || '';
-      log('qr11_vidal_match = '+vidalMatch);
-      if(normalize(vidalMatch).includes('oui')){
-        await showImage('vidal_jeune - Copie.webp');
-        showText("vous l'aviez imaginé comme ça jeune",'bottom');
-        await sleep(4000);
-        hideText(); hideImage();
-      } else {
-        log('Photo Vidal non affichée (réponse != oui)');
-      }
+  if(charChoice==='Vidal'){
+    const vidalMatch = localStorage.getItem('qr11_vidal_match') || '';
+    if(normalize(vidalMatch).includes('oui')){
+      await showImage('vidal_jeune - Copie.webp');
+      showText("vous l'aviez imaginé comme ça jeune",'bottom');
+      await sleep(4000);
+      hideText(); hideImage();
     }
-
-    let txt=descriptions[charChoice]||'';
-    const firstCarnet=localStorage.getItem('qr11_first_carnet')||localStorage.getItem('qr11_carnet_first')||'';
-    if(['Sam','Noé','Rémy','Dubois'].includes(charChoice) && normalize(firstCarnet)===normalize(charChoice)){
-      txt+="\n\nDécidément, ce personnage vous intrigue, vous aviez choisi ce personnage en premier dans le carnet.";
-    }
-
-    showText(txt,'center');
-    await sleep(6000);
-    hideText();
-
-    showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",'center');
-    await sleep(7000);
-    hideText();
-
-    stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
-    show(stats);
-    show(restart);
-    log('Terminé');
-  }catch(e){
-    log('ERREUR run: '+e.message);
   }
+
+  let txt=descriptions[charChoice]||'';
+  const firstCarnet = (localStorage.getItem('qr11_carnet_first') || localStorage.getItem('qr11_first_carnet') || '').toUpperCase();
+  const carnetSet = ['LAVELOT','MOREL','DUBOIS'];
+  const charSet = ['SAM','NOÉ','NOE','CHLOÉ','CHLOE'];
+  if(carnetSet.includes(firstCarnet) && charSet.includes(normalize(charChoice).toUpperCase().replace('É','E'))){
+    txt += "
+
+Décidément ce personnage t'intrigue, tu l'avais choisi aussi en premier dans le carnet de M. Vidal";
+  }
+
+  showText(txt,'center');
+  await sleep(6000);
+  hideText();
+
+  showText("Dans quelques secondes vous allez lire la suite du roman.
+Chaque personnage dans cette pièce a une raison d’être là.
+Vous aussi vous savez des choses sur eux.
+Utilisez-les.",'center');
+  await sleep(7000);
+  hideText();
+
+  stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
+  show(stats);
+  show(restart);
 }
-log('Page chargée');
 </script>
 </body>
 </html>
