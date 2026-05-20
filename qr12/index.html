@@ -13,6 +13,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2vmin;width:88%;max-height:45vh;overflow-y:auto;z-index:80}
 .btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+.btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;opacity:0;transition:opacity .8s}
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0}
@@ -33,7 +34,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 
 <script>
 function log(m){ const el=document.getElementById('log'); el.textContent+=m+"\n"; }
-window.onerror=(msg,src,line)=>{ log('ERREUR: '+msg); };
+window.onerror=(msg)=>{ log('ERREUR: '+msg); };
 
 const $=id=>document.getElementById(id);
 const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), stats=$('stats'), narrateur=$('narrateur');
@@ -72,6 +73,23 @@ function askSingle(q,opts){
   });
 }
 
+function askMulti(q,opts){
+  return new Promise(res=>{
+    showText(q,'center');
+    choices.innerHTML='';
+    const sel=new Set();
+    opts.forEach(o=>{
+      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
+      b.onclick=()=>{ b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); };
+      choices.appendChild(b);
+    });
+    const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Valider'; ok.style.background='#fff'; ok.style.color='#000'; ok.style.marginTop='1vmin';
+    ok.onclick=()=>{ hideText(); hide(choices); res([...sel]); };
+    choices.appendChild(ok);
+    flex(choices);
+  });
+}
+
 const descriptions={
  'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
  'Noé':"Regard sur ses chaussures. La posture des mauvais jours.",
@@ -101,18 +119,26 @@ async function showInesZoom(){
 
 async function run(){
   try{
+    log('Page chargée');
     log('run() appelé');
     hide(start); hide(restart); hide(stats);
     const used=addUsed('qr12');
     log('Scans utilisés: '+used);
+
     await play(narrateur);
     await sleep(8000);
     try{ narrateur.pause(); narrateur.currentTime=0; }catch{}
+
+    const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+    log('Pièce: '+repPiece.join(', '));
+
     await showImage('touslessuspects.jpg');
     await sleep(5000);
     hideImage();
+
     const charChoice=await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
     log('Choix: '+charChoice);
+
     if(charChoice==='Inès'){ await showInesZoom(); }
     if(charChoice==='Vidal'){
       await showImage('vidal_jeune - Copie.webp');
@@ -120,17 +146,21 @@ async function run(){
       await sleep(4000);
       hideText(); hideImage();
     }
+
     let txt=descriptions[charChoice]||'';
     const firstCarnet=localStorage.getItem('qr11_first_carnet')||localStorage.getItem('qr11_carnet_first')||'';
     if(['Sam','Noé','Rémy','Dubois'].includes(charChoice) && normalize(firstCarnet)===normalize(charChoice)){
       txt+="\n\nDécidément, ce personnage vous intrigue, vous aviez choisi ce personnage en premier dans le carnet.";
     }
+
     showText(txt,'center');
     await sleep(6000);
     hideText();
+
     showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",'center');
     await sleep(7000);
     hideText();
+
     stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
     show(stats);
     show(restart);
@@ -139,7 +169,6 @@ async function run(){
     log('ERREUR run: '+e.message);
   }
 }
-log('Page chargée');
 </script>
 </body>
 </html>
