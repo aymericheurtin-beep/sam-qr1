@@ -71,6 +71,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 start.onclick=()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   start.classList.add('hidden');
   sequence();
 };
@@ -165,3 +166,4 @@ async function final(){
 </script>
 </body>
 </html>
+
