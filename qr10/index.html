@@ -89,6 +89,7 @@ async function run(){
   let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr10_done','1');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr10');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
   await play(a1); await sleep(8000); a1.pause(); a1.currentTime=0;
 
@@ -137,3 +138,4 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
+
