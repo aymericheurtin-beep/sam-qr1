@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -84,6 +84,7 @@ let choix = '';
 
 btn.onclick = () => {
   btn.style.display = 'none';
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   qscreen.classList.add('active');
 };
 
@@ -138,3 +139,4 @@ restart.onclick = () => location.reload();
 </script>
 </body>
 </html>
+
