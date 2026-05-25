@@ -82,6 +82,7 @@ localStorage.setItem('scans_total',t);
 startBtn.onclick=()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr1');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   startBtn.remove();
   // Démarrage rapide : on saute l'écran meta vide
   step0();
@@ -161,4 +162,3 @@ restartBtn.onclick=()=>{location.reload()};
 </script>
 </body>
 </html>
-
