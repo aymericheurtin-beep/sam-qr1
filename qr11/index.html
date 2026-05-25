@@ -135,13 +135,17 @@ function waitImageTap(){
 
 async function run(){
   hide(start);hide(restart);
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr11');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
   showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
   await sleep(3500);hide(text);await hideImage();
 
-  const vidalImagined = localStorage.getItem('qr6_vidal_imagined') || '...';
-  await askMulti(`Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`,[
+  const vidalImagined = localStorage.getItem('qr6_vidal_imagined');
+  const bureauQuestion = vidalImagined
+    ? `Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`
+    : `Son bureau, un samedi matin, vous l'imaginez comment ?`;
+  await askMulti(bureauQuestion,[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
 
@@ -227,3 +231,4 @@ async function run(){
 </script>
 </body>
 </html>
+
