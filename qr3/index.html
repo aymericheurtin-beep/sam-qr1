@@ -35,13 +35,25 @@ button{font-size:clamp(18px,4vmin,24px)!important}
 </div>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 const s0=document.getElementById('s0');
 const s1=document.getElementById('s1');
 const v0=document.getElementById('v0');
 
-startBtn.onclick=async()=>{
+startBtn.onclick=async()=>{ trackScan('qr3');
   startBtn.style.display='none';
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr3');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   s0.classList.add('active');
@@ -59,3 +71,5 @@ restartBtn.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
+
