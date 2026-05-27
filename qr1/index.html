@@ -60,6 +60,18 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
 <audio id="a4" src="audio/p4-absence.mp3"></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const meta=document.getElementById('meta');
 const s0=document.getElementById('s0');
 const s1=document.getElementById('s1');
@@ -76,12 +88,12 @@ const restartBtn=document.getElementById('restartBtn');
 
 const PAUSE = 1200;
 
-let t=parseInt(localStorage.getItem('scans_total')||0)+1;
-localStorage.setItem('scans_total',t);
 
-startBtn.onclick=()=>{
-  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',u);
+
+
+startBtn.onclick=()=>{ trackScan('qr1');
+  
+  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr1');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   startBtn.remove();
   // Démarrage rapide : on saute l'écran meta vide
@@ -107,7 +119,7 @@ function step0(){
 function showQuestionCadenas(){
   qCadenas.classList.add('active');
   document.querySelectorAll('#qCadenas .choiceBtn').forEach(btn=>{
-    btn.onclick=()=>{
+    btn.onclick=()=>{ trackScan('qr1');
       const val = btn.dataset.val;
       localStorage.setItem('qr1_cadenas', val);
       qCadenas.classList.add('fadeout');
@@ -158,7 +170,7 @@ v1.onended=()=>{
   },1000);
 }
 
-restartBtn.onclick=()=>{location.reload()};
+restartBtn.onclick=()=>{ trackScan('qr1');location.reload()};
 </script>
 </body>
 </html>
