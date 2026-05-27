@@ -52,7 +52,6 @@ small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !im
 <audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -75,14 +74,9 @@ const overlay=document.getElementById('overlay');
 let order=[];
 let opened={caméra:false,fumée:false,carnet:false};
 
-
-
-
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 start.onclick=()=>{ trackScan('qr8');
-  
-  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   start.classList.add('hidden');
   sequence();
@@ -164,7 +158,6 @@ function interpretation(first){
 async function final(){
   const first=order[0];
   const interp=interpretation(first);
-  // PONT QR8 -> QR9/10/11/12
   try{
     localStorage.setItem('qr8_first', first);
     localStorage.setItem('qr8_order', JSON.stringify(order));
@@ -178,5 +171,3 @@ async function final(){
 </script>
 </body>
 </html>
-
-
