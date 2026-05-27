@@ -43,20 +43,22 @@ small, .sub, #recall, #hint, #carnetLine {
 <audio id="intro" src="./intro.mp3" preload="auto"></audio>
 
 <script>
-
-        if(!localStorage.getItem('qr_used_set')){
-            localStorage.setItem('scans_total', '12');
-            localStorage.setItem('scans_used', '0');
-            localStorage.setItem('qr_used_set', '[]');
-        }
+// Enregistrement immédiat du QR0 dans l'historique et passage du total à 13
+try {
+  let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+  usedSet.add('qr0'); 
+  let arr = Array.from(usedSet);
+  localStorage.setItem('qr_used_set', JSON.stringify(arr));
+  localStorage.setItem('scans_used', arr.length);
+  localStorage.setItem('scans_total', '13');
+} catch(e) { 
+  console.error('Storage error:', e); 
+}
         
 const btn=document.getElementById('btn');
 const msg=document.getElementById('msg');
 const intro=document.getElementById('intro');
 const restart=document.getElementById('restart');
-
-
-
 
 btn.onclick=()=>{
   btn.style.display='none';
