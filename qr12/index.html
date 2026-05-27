@@ -228,7 +228,7 @@ async function run(){
   // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
   await new Promise(res=>{
     const check=setInterval(()=>{
-      if(window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
+      if(touchedCount===0 || window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
     },200);
   });
 
@@ -250,10 +250,10 @@ async function run(){
   hide(sceneWrap); hide(tooltip);
   await sleep(400);
 
-  showText("Dans quelques instant, vous allez lire la suite de ce roman.
+  showText(`Dans quelques instant, vous allez lire la suite de ce roman.
 Chaque personnage dans cette pièce a une raison d'être là.
 Vous aussi, vous savez des choses sur eux.
-Utilisez-les.",'center');
+Utilisez-les.`, 'center');
   await sleep(12000);
   hideText();
 
