@@ -35,6 +35,18 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <audio id="a3" src="vibreur.mp3" preload="auto"></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const $ = id => document.getElementById(id);
 const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), video = $('video'), count = $('count');
 const a1 = $('a1'), a2 = $('a2'), a3 = $('a3');
@@ -138,4 +150,5 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
+
 
