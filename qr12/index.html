@@ -22,7 +22,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #sceneImg{display:block;max-width:96vw;max-height:82vh;width:auto;height:auto}
 
 .zone{position:absolute;cursor:pointer;border-radius:4px;border:2px solid transparent;transition:border-color .15s,background .15s;box-sizing:border-box}
-.zone:hover,.zone.active{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
+.zone:hover,.zone.active {border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
 
 .zone-label{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;font-size:clamp(13px,3vmin,17px);padding:4px 10px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:90;border:1px solid rgba(255,255,255,.3)}
 .zone:hover .zone-label,.zone.active .zone-label{opacity:1}
@@ -79,7 +79,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '13'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -229,7 +229,7 @@ async function run(){
   zonesUnlocked=true;
   imageHint.style.opacity='1';
 
-    // Attendre premier tap (max 40 sec)
+  // Attendre premier tap (max 40 sec)
   await new Promise(res=>{
     let waited=0;
     const check=setInterval(()=>{
@@ -262,14 +262,15 @@ async function run(){
   hide(sceneWrap); hide(tooltip);
   await sleep(400);
 
-  showText(`Dans quelques instant, vous allez lire la suite de ce roman.
+  showText(`Dans quelques instants, vous allez lire la suite de ce roman.
 Chaque personnage dans cette pièce a une raison d'être là.
 Vous aussi, vous savez des choses sur eux.
 Utilisez-les.`, 'center');
   await sleep(12000);
   hideText();
 
-  stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
+  // Affichage final mis à jour à 13 scans proposés
+  stats.innerHTML=`Scans proposés : 13<br>Scans utilisés : ${used}`;
   show(stats);
   show(restart);
 }
@@ -279,5 +280,4 @@ window.addEventListener('resize',()=>{ if(sceneWrap.style.display!=='none') cali
 </script>
 <div id="finalStats" style="margin-top:20px; font-weight:bold; color:#ffcc00; font-size:1.2em; text-align:center;"></div></body>
 </html>
-
 
