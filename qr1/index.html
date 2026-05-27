@@ -60,7 +60,6 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
 <audio id="a4" src="audio/p4-absence.mp3"></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -88,15 +87,9 @@ const restartBtn=document.getElementById('restartBtn');
 
 const PAUSE = 1200;
 
-
-
-
 startBtn.onclick=()=>{ trackScan('qr1');
-  
-  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr1');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   startBtn.remove();
-  // Démarrage rapide : on saute l'écran meta vide
   step0();
 }
 
