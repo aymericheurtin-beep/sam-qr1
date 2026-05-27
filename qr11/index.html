@@ -44,7 +44,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -52,7 +51,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '13'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -147,7 +146,8 @@ function waitImageTap(){
 
 async function run(){
   hide(start);hide(restart);
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr11');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  trackScan('qr11');
+
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
   showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
@@ -183,7 +183,7 @@ async function run(){
   const carnetOrder=[];
   await new Promise(res=>{
     carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
-      btn.onclick=()=>{ trackScan('qr11');
+      btn.onclick=()=>{
         if(btn.classList.contains('used'))return;
         btn.classList.add('used');
         const id=btn.dataset.id;
