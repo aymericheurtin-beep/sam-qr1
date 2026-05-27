@@ -231,8 +231,13 @@ async function run(){
       if(tooltip.style.display==='none'){clearInterval(check);res();}
     },200);
   });
-
-  // Bonus Inès
+// Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
+  await new Promise(res=>{
+    const check=setInterval(()=>{
+      if(tooltip.style.display==='none'){clearInterval(check);res();}
+    },200);
+  });
+// Bonus Inès
   if(lastWho==='Inès') await showInesZoom();
 
   // Bonus Vidal reconnu dans QR11
@@ -254,7 +259,7 @@ async function run(){
 Chaque personnage dans cette pièce a une raison d'être là.
 Vous aussi, vous savez des choses sur eux.
 Utilisez-les.",'center');
-  await sleep(10000);
+  await sleep(12000);
   hideText();
 
   stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
