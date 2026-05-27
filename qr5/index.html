@@ -48,7 +48,7 @@ small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !im
 <audio id="voix" src="./noe_je_serais_la.mp3" preload="auto"></audio>
 
 <script>
-
+grid=true;
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -69,12 +69,7 @@ const post=document.getElementById('post');
 const bruit=document.getElementById('bruit');
 const voix=document.getElementById('voix');
 
-
-
-
 btn.onclick=()=>{ trackScan('qr5');
-  
-  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr5');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   btn.style.display='none';
   bruit.play().catch(()=>alert('Activez le son'));
