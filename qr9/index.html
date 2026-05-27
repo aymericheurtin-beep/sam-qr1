@@ -29,7 +29,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <audio id="aNarrateur" src="audio_inesnoe.mp3" preload="auto"></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -75,8 +74,7 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
-  localStorage.setItem('scans_used', used);
+  trackScan('qr9'); /* Fix appliqué : calcul incrémental aveugle supprimé */
   localStorage.setItem('qr9_done','1');
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr9');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
@@ -120,8 +118,7 @@ async function run(){
     if(qr1 === repCadenas){
       await showText('Bien joué, vous vous en êtes souvenus...',3500,'center');
     }else{
-      await showText(`Étonnant.
-La dernière fois vous aviez imaginé ${qr1}`,4000,'center');
+      await showText(`Étonnant.\nLa dernière fois vous aviez imaginé ${qr1}`,4000,'center');
     }
   }
 
