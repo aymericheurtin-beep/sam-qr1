@@ -66,6 +66,18 @@ small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !im
 <audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const btn = document.getElementById('btn');
 const qscreen = document.getElementById('qscreen');
 const choices = document.querySelectorAll('.choice');
@@ -139,4 +151,3 @@ restart.onclick = () => location.reload();
 </script>
 </body>
 </html>
-
