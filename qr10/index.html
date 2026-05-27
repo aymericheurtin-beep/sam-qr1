@@ -35,7 +35,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <audio id="a3" src="vibreur.mp3" preload="auto"></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -98,8 +97,7 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
-  localStorage.setItem('scans_used', used);
+  trackScan('qr10'); /* Fix appliqué : calcul incrémental aveugle supprimé */
   localStorage.setItem('qr10_done','1');
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr10');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
@@ -150,5 +148,4 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
-
 
