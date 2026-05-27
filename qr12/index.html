@@ -47,7 +47,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <div id="countdown"></div>
 
 <div id="sceneWrap">
-    <img id="sceneImg" src="touslessuspects.jpg" alt="La réunion">
+  <img id="sceneImg" src="touslessuspects.jpg" alt="La réunion">
   <div class="zone" data-who="Rémy"  style="left:7.8%;  top:12.0%; width:9.8%; height:35.0%"><span class="zone-label">Rémy</span></div>
   <div class="zone" data-who="Vidal" style="left:25.3%; top:14.8%; width:11.7%; height:22.9%"><span class="zone-label">Vidal</span></div>
   <div class="zone" data-who="Inès"  style="left:61.0%; top:17.7%; width:14.0%; height:37.5%"><span class="zone-label">Inès</span></div>
@@ -71,7 +71,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <audio id="porte"     src="porte.mp3"     preload="auto" playsinline></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -80,7 +79,11 @@ function trackScan(id) {
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
     localStorage.setItem('scans_total', '13'); 
-  } catch(e) { console.error('Storage error:', e); }
+    return arr.length;
+  } catch(e) { 
+    console.error('Storage error:', e); 
+    return 0;
+  }
 }
 
 const $=id=>document.getElementById(id);
@@ -109,13 +112,6 @@ function showText(t,pos='center'){text.className='';text.classList.add(pos);text
 function hideText(){hide(text)}
 async function play(a){try{await a.play()}catch{}}
 function normalize(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
-
-function addUsed(id){
-  const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
-  set.add(id);
-  localStorage.setItem('qr_used_set',JSON.stringify([...set]));
-  return set.size;
-}
 
 async function runCountdown(from){
   countdown.style.opacity='1';
@@ -186,7 +182,7 @@ async function showInesZoom(){
 
 async function run(){
   hide(start);
-  const used=addUsed('qr12');
+  const used = trackScan('qr12');
 
   // — PHASE 1 : pont carnet —
   const firstCarnet=(localStorage.getItem('qr11_carnet_first')||'').toUpperCase();
@@ -269,7 +265,6 @@ Utilisez-les.`, 'center');
   await sleep(12000);
   hideText();
 
-  // Affichage final mis à jour à 13 scans proposés
   stats.innerHTML=`Scans proposés : 13<br>Scans utilisés : ${used}`;
   show(stats);
   show(restart);
@@ -278,6 +273,5 @@ Utilisez-les.`, 'center');
 setupZones();
 window.addEventListener('resize',()=>{ if(sceneWrap.style.display!=='none') calibrateZones(); });
 </script>
-<div id="finalStats" style="margin-top:20px; font-weight:bold; color:#ffcc00; font-size:1.2em; text-align:center;"></div></body>
+</body>
 </html>
-
