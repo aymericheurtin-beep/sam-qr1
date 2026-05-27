@@ -224,17 +224,10 @@ async function run(){
       waited+=500;
       if(touchedCount>=1||waited>=40000){clearInterval(check);res();}
     },500);
-  });
-  // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
+  });  // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
   await new Promise(res=>{
     const check=setInterval(()=>{
-      if(tooltip.style.display==='none'){clearInterval(check);res();}
-    },200);
-  });
-// Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
-  await new Promise(res=>{
-    const check=setInterval(()=>{
-      if(tooltip.style.display==='none'){clearInterval(check);res();}
+      if(window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
     },200);
   });
 // Bonus Inès
