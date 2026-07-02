@@ -36,8 +36,16 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
   <video id="v0" src="audio/courir.mp4" playsinline muted></video>
 </div>
 
+<div id="s1" class="screen">
+  <img src="main.webp" alt="">
+</div>
+
+<div id="s2" class="screen">
+  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline></video>
+</div>
+
 <div id="qCadenas" class="screen">
-  <p>Comment voyez-vous le cadenas ?</p>
+  <p>Comment avez-vous imaginé le cadenas ?</p>
   <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px">
     <button class="choiceBtn" data-val="Un cadenas à chiffres">Un cadenas à chiffres</button>
     <button class="choiceBtn" data-val="Un cadenas à clé">Un cadenas à clé</button>
@@ -45,21 +53,11 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
   </div>
 </div>
 
-<div id="s1" class="screen">
-  <img src="main.webp" alt="">
-</div>
-<div id="s2" class="screen">
-  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline></video>
-</div>
 <div id="s3" class="screen">
-  <p>Comparez avec ce que vous aviez imaginé.</p>
+  <p>Et vous, comment avez-vous imaginé la scène ?</p>
 </div>
 
-<audio id="a2" src="audio/p2-sam.mp3"></audio>
-<audio id="a3" src="audio/p3-toc.mp3"></audio>
-<audio id="a4" src="audio/p4-absence.mp3"></audio>
-
-<script>
+<audio id="a2" src="audio/p2-sam.mp3"></audio> <audio id="a3" src="audio/p3-toc.mp3"></audio> <audio id="a4" src="audio/p4-absence.mp3"></audio> <script>
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -85,85 +83,102 @@ const a4=document.getElementById('a4');
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 
-const PAUSE = 1200;
-
-startBtn.onclick=()=>{ trackScan('qr1');
+// Clic de départ
+startBtn.onclick=()=>{ 
+  trackScan('qr1');
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr1');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
-  startBtn.remove();
-  step0();
+  startBtn.style.display = 'none';
+  stepSamQuiCourt();
 }
 
-function step0(){
+// 1. Vidéo de Sam qui court + son audio associé
+function stepSamQuiCourt(){
   s0.classList.add('active');
   v0.play().catch(e=>console.log('Video courir error:',e));
   a2.play().catch(e=>console.log('Audio2 error:',e));
-  setTimeout(()=>{
-    v0.pause();
+  
+  // On passe à la suite quand la vidéo (ou l'audio) se termine. 
+  // J'utilise le plus long des deux ou la fin de la vidéo pour enchaîner :
+  v0.onended = () => {
     s0.classList.add('fadeout');
-  },5000);
-  a2.onended=()=>{
     setTimeout(()=>{
       s0.classList.remove('active','fadeout');
-      showQuestionCadenas();
-    },500);
+      stepMainEtAudio();
+    },1000);
+  };
+  
+  // Sécurité si la vidéo ne déclenche pas le "onended" (ex: si l'audio finit avant et qu'on veut couper)
+  a2.onended = () => {
+    if(v0.playing) v0.pause();
+    s0.classList.add('fadeout');
+    setTimeout(()=>{
+      s0.classList.remove('active','fadeout');
+      stepMainEtAudio();
+    },1000);
+  };
+}
+
+// 2. La main et l'audio "1 fois, 2 fois, 3 fois..."
+function stepMainEtAudio(){
+  s1.classList.add('active');
+  a3.play().catch(e=>console.log('Audio3 error:',e));
+  
+  a3.onended=()=>{
+    s1.classList.add('fadeout');
+    setTimeout(()=>{
+      s1.classList.remove('active','fadeout');
+      stepTrouNoir();
+    },1000);
   }
 }
 
+// 3. Vidéo et audio trou noir
+function stepTrouNoir(){
+  s2.classList.add('active');
+  v1.play().catch(e=>console.log('Video trounoir error:',e));
+  a4.play().catch(e=>console.log('Audio4 error:',e));
+  
+  v1.onended=()=>{
+    s2.classList.add('fadeout');
+    setTimeout(()=>{
+      s2.classList.remove('active','fadeout');
+      showQuestionCadenas();
+    },1000);
+  }
+}
+
+// 4. Comment avez-vous imaginé le cadenas ? (3 réponses)
 function showQuestionCadenas(){
   qCadenas.classList.add('active');
   document.querySelectorAll('#qCadenas .choiceBtn').forEach(btn=>{
-    btn.onclick=()=>{ trackScan('qr1');
+    btn.onclick=()=>{ 
+      trackScan('qr1');
       const val = btn.dataset.val;
       localStorage.setItem('qr1_cadenas', val);
       qCadenas.classList.add('fadeout');
       setTimeout(()=>{
         qCadenas.classList.remove('active','fadeout');
-        step1();
+        stepSceneImaginee();
       },1000);
     }
   });
 }
 
-function step1(){
-  s1.classList.add('active');
-  a3.play().catch(e=>console.log('Audio3 error:',e));
-  a3.onended=()=>{
-    s1.classList.add('fadeout');
-    setTimeout(()=>{
-      s1.classList.remove('active','fadeout');
-      step2();
-    },1000);
-  }
-}
-
-function step2(){
+// 5. Et vous comment avez-vous vu la scène ? + Bouton Recommencer
+function stepSceneImaginee(){
+  s3.classList.add('active');
+  
+  // On affiche le bouton recommencer après un court instant sur ce texte
   setTimeout(()=>{
-    s2.classList.add('active');
-    a4.play().catch(e=>console.log('Audio4 error:',e));
-    a4.onended=()=>{
-      setTimeout(()=>{
-        v1.play().catch(e=>console.log('Video trounoir error:',e));
-      },800);
-    }
-  },PAUSE);
+    restartBtn.style.display='block';
+    setTimeout(()=>restartBtn.classList.add('show'),50);
+  },2000);
 }
 
-v1.onended=()=>{
-  s2.classList.add('fadeout');
-  setTimeout(()=>{
-    s2.classList.remove('active','fadeout');
-    s3.classList.add('active');
-    setTimeout(()=>{
-      s3.classList.add('fadeout');
-      setTimeout(()=>{
-        restartBtn.style.display='block';
-        setTimeout(()=>restartBtn.classList.add('show'),50);
-      },1000);
-    },3000);
-  },1000);
-}
-
-restartBtn.onclick=()=>{ trackScan('qr1');location.reload()};
+restartBtn.onclick=()=>{ 
+  trackScan('qr1');
+  location.reload();
+};
 </script>
 </body>
 </html>
