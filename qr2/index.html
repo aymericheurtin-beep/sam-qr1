@@ -40,7 +40,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '13'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
